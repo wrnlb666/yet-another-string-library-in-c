@@ -1,5 +1,12 @@
 #include "str.h"
-#define _GNU_SOURCE
+
+
+#ifdef USE_GC
+#include <gc/gc.h>
+#define malloc( size ) GC_malloc( size )
+#define realloc( ptr, size ) GC_realloc( ptr, size )
+#define free( ptr ) GC_free( ptr )
+#endif  //USE_GC
 
 
 struct str_cstr{ char* cstr; size_t length; };
@@ -97,8 +104,10 @@ string_t str_new_strings( char* src, ... )
             curr_pos += arr[i].length;
         }
         result.cstr[curr_pos] = 0;
+        free( arr );
         return result;
     }
+    free( arr );
     return (string_t) { 0 };
 }
 
@@ -131,6 +140,7 @@ void str_destroy_string_arr( string_t* str_arr )
     {
         str_destroy_string( &str_arr[index++] );
     }
+    free( str_arr );
 }
 
 
@@ -174,7 +184,8 @@ string_t str_append_cstr( const char* start, const char* end )
 string_t* str_split( string_t src, const char* needle )
 {
     size_t nlen = strlen( needle );
-    char* str = strdup( src.cstr );
+    char* str = malloc( sizeof (char) * ( src.length + 1 ) );
+    strncpy( str, src.cstr, src.length + 1 );
     char* ptr = str;
     size_t cap = 16;
     string_t* tokens = malloc( sizeof ( string_t ) * cap );
@@ -199,7 +210,8 @@ string_t* str_split( string_t src, const char* needle )
     }
     tokens[index] = (string_t) { .length = strlen(str), .capacity = 16 };
     if ( !str_resize( &tokens[index], tokens[index].length ) ) return ( free(ptr), NULL );
-    strcpy( tokens[index].cstr, str );
+    strncpy( tokens[index].cstr, str, tokens[index].length );
+    tokens[index].cstr[ tokens[index].length ] = 0;
     index++;
     tokens[index] = (string_t) { 0 };
     free(ptr);

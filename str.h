@@ -11,19 +11,14 @@
 #include <ctype.h>
 
 
+
+// user should never change the value of length or capacity in the code. 
 typedef struct string_t
 {
     size_t length;
     size_t capacity;
     char* cstr;
 } string_t;
-
-typedef struct wstring_t
-{
-    size_t length;
-    size_t capacity;
-    wchar_t* cstr;
-} wstring_t;
 
 
 // constructor
@@ -39,6 +34,7 @@ void str_destroy_string( string_t* string );
 void str_destroy_strings( string_t* string, ... );
 
 // free an array of string, the last element of the array should be (string_t) { 0 }, at least the capacity should be 0
+// the array must be allocated on the heap since this function also calls free on the array. 
 void str_destroy_string_arr( string_t* str_arr );
 
 // effectivly clear the string, set the length to 0, may or may not change the capacity. 
