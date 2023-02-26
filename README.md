@@ -51,3 +51,16 @@ void str_toupper( string_t* string );
 // set all the characters to lower case, UB if special characters
 void str_tolower( string_t* string );
 ```
+
+#example of using `str_split`:
+```c
+string_t str = str_new_strings( "Hello World", "  ", "abc", "  ", "123", "  ", NULL );
+string_t* str_arr = str_split( str, "  " );
+for ( int i = 0; str_arr[i].capacity; i++ )
+{
+    str_toupper( &str_arr[i] );
+    printf( "%zu, %zu, %s\n", str_arr[i].length, str_arr[i].capacity, str_arr[i].cstr );
+}
+str_destroy_string_arr( str_arr );
+str_destroy_string( &str );
+```
