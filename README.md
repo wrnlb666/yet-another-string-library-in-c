@@ -2,7 +2,7 @@
 my string library
 
 
-define `USE_GC` when compiling str.c to use bdw-gc to avoid calling any `str_destroy` functions. 
+define `USE_GC` when compiling `str.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid calling any `str_destroy` functions. 
 
 APIs: 
 ```c
