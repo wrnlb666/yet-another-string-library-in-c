@@ -52,7 +52,7 @@ void str_toupper( string_t* string );
 void str_tolower( string_t* string );
 ```
 
-#example of using `str_split`:
+# example of using `str_split`:
 ```c
 string_t str = str_new_strings( "Hello World", "  ", "abc", "  ", "123", "  ", NULL );
 string_t* str_arr = str_split( str, "  " );
