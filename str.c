@@ -173,7 +173,9 @@ string_t str_append_cstr( const char* start, const char* end )
 
 string_t* str_split( string_t src, const char* needle )
 {
+    size_t nlen = strlen( needle );
     char* str = strdup( src.cstr );
+    char* ptr = str;
     size_t cap = 16;
     string_t* tokens = malloc( sizeof ( string_t ) * cap );
     char* token;
@@ -183,10 +185,10 @@ string_t* str_split( string_t src, const char* needle )
     while ( token != NULL )
     {
         *token = 0;
-        tokens[index] = (string_t) { .length = strlen(needle), .capacity = 16 };
-        if ( !str_resize( &tokens[index], tokens[index].length ) ) return NULL;
+        tokens[index] = (string_t) { .length = strlen(str), .capacity = 16 };
+        if ( !str_resize( &tokens[index], tokens[index].length ) ) return ( free(ptr), NULL );
         strcpy( tokens[index].cstr, str );
-        str = token + tokens[index].length;
+        str = token + nlen;
         index++;
         token = strstr( str, needle );
         if ( index + 2 == cap )
@@ -195,12 +197,12 @@ string_t* str_split( string_t src, const char* needle )
             tokens = realloc( tokens, sizeof ( string_t ) * cap );
         }
     }
-    tokens[index] = (string_t) { .length = strlen(needle), .capacity = 16 };
-    if ( !str_resize( &tokens[index], tokens[index].length ) ) return NULL;
+    tokens[index] = (string_t) { .length = strlen(str), .capacity = 16 };
+    if ( !str_resize( &tokens[index], tokens[index].length ) ) return ( free(ptr), NULL );
     strcpy( tokens[index].cstr, str );
-    str = token + tokens[index].length;
     index++;
     tokens[index] = (string_t) { 0 };
+    free(ptr);
     return tokens;
 }
 
