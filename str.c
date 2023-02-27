@@ -32,7 +32,7 @@ static inline bool str_resize( string_t* string, size_t size )
             }
         }
         string->cstr = realloc( string->cstr, sizeof ( char ) * string->capacity );
-        if ( string->cstr == NULL ) return ( fprintf( stderr, "[ERRO]: run out of memory\n" ), false );
+        if ( string->cstr == NULL ) return ( fputs( "[ERRO]: run out of memory", stderr ), false );
     }
     else
     {
@@ -53,7 +53,7 @@ static inline bool str_resize( string_t* string, size_t size )
             else break;
         }
         string->cstr = realloc( string->cstr, sizeof ( char ) * string->capacity );
-        if ( string->cstr == NULL ) return ( fprintf( stderr, "[ERRO]: run out of memory\n" ), false );
+        if ( string->cstr == NULL ) return ( fputs( "[ERRO]: run out of memory", stderr ), false );
     }
     string->cstr[ string->length ] = 0;
     return true;
@@ -241,7 +241,7 @@ string_t str_substr( string_t src, size_t start, size_t size )
 {
     if ( start + size > src.length )
     {
-        return ( fprintf( stderr, "[ERRO]: substring out of bound!\n" ), (string_t) { 0 } );
+        return ( fputs( "[ERRO]: substring out of bound!", stderr ), (string_t) { 0 } );
     }
     string_t substr = { .length = size, .capacity = 16 };
     str_resize( &substr, size );
