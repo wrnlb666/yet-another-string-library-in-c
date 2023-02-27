@@ -64,6 +64,7 @@ for ( int i = 0; str_arr[i].capacity; i++ )
     str_toupper( &str_arr[i] );
     printf( "%zu, %zu, %s\n", str_arr[i].length, str_arr[i].capacity, str_arr[i].cstr );
 }
+// the following two destroy function is not necessary if build with `-D USE_GC`
 str_destroy_string_arr( str_arr );
 str_destroy_string( &str );
 ```
