@@ -237,3 +237,15 @@ void str_tolower( string_t* string )
 }
 
 
+string_t str_substr( string_t src, size_t start, size_t size )
+{
+    if ( start + size > src.length )
+    {
+        return ( fprintf( stderr, "[ERRO]: substring out of bound!\n" ), (string_t) { 0 } );
+    }
+    string_t substr = { .length = size, .capacity = 16 };
+    str_resize( &substr, size );
+    strncpy( substr.cstr, src.cstr + start, size );
+    substr.cstr[ substr.length ] = 0;
+    return substr;
+}

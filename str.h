@@ -57,6 +57,9 @@ void str_toupper( string_t* string );
 // set all the characters to lower case, UB if special characters
 void str_tolower( string_t* string );
 
+// return a substr starting from index start, with size size
+string_t str_substr( string_t src, size_t start, size_t size );
+
 
 
 #endif  // __STR_H__
