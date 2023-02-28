@@ -63,7 +63,7 @@ string_t str_substr( string_t src, size_t start, size_t size );
 ```c
 string_t str = str_new_strings( "Hello World", "  ", "abc", "  ", "123", "  ", NULL );
 string_t* str_arr = str_split( str, "  " );
-for ( int i = 0; str_arr[i].capacity; i++ )
+for ( int i = 0; str_arr[i].cstr; i++ )
 {
     str_toupper( &str_arr[i] );
     printf( "%zu, %zu, %s\n", str_arr[i].length, str_arr[i].capacity, str_arr[i].cstr );
