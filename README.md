@@ -3,7 +3,7 @@
 
 define `USE_GC` when compiling `str.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid calling any `str_destroy` functions. 
 
-APIs: 
+### Basic APIs:
 ```c
 // user should never change the value of length or capacity in the code. 
 typedef struct string_t
@@ -42,6 +42,9 @@ string_t str_appends( string_t start, ... );
 // add null terminated c type string to string_t, return a string_t
 string_t str_append_cstr( string_t start, const char* end );
 
+// add null terminated c type strings to string_t, the last element has to be NULL, return a string_t
+string_t str_append_cstrs( string_t start, ... );
+
 // split src string upon needle string, returns an array of string_t with the last element being (string_t) { 0 }
 // the easiest way to check if the array ends is to check if `string_t.cstr == NULL`
 // caller free, call `void str_destroy_string_arr( string_t* str_arr )` first then call `free` on the returned pointer
@@ -55,7 +58,6 @@ void str_to_lower( string_t* string );
 
 // return a substr starting from index start, with size size
 string_t str_substr( string_t src, size_t start, size_t size );
-
 
 ```
 
