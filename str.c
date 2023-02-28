@@ -9,7 +9,7 @@
 #endif  //USE_GC
 
 
-struct str_cstr{ char* cstr; size_t length; };
+// struct str_cstr{ char* cstr; size_t length; };
 
 
 static inline bool str_resize( string_t* string, size_t size )
@@ -75,39 +75,28 @@ string_t str_new_string( char* src )
 
 string_t str_new_strings( char* src, ... )
 {
-    va_list ap;
+    va_list ap, _ap;
     va_start( ap, src );
+    va_copy( _ap, ap );
     size_t length = 0;
-    size_t index = 0;
-    size_t cap = 16;
-    struct str_cstr* arr = malloc( sizeof ( struct str_cstr* ) * cap );
     for ( char* str = src; str != NULL; str = va_arg( ap, char* ) )
     {
-        if ( index == cap )
-        {
-            cap += 16;
-            arr = realloc( arr, sizeof ( struct str_cstr* ) * cap );
-        }
-        arr[ index ].cstr = str;
-        arr[ index ].length = strlen(str);
-        length += arr[ index ].length;
-        index++;
+        length += strlen(str);
     }
-    va_end( ap );
+    va_end(ap);
+    size_t index = 0;
     string_t result = { .length = length, .capacity = 16 };
     if ( str_resize( &result, length ) )
     {
-        size_t curr_pos = 0;
-        for ( size_t i = 0; i < index; i++ )
+        for ( char* str = src; str!= NULL; str = va_arg( _ap, char* ) )
         {
-            memmove( result.cstr + curr_pos, arr[i].cstr, arr[i].length );
-            curr_pos += arr[i].length;
+            strcpy( result.cstr + index, str );
+            index += strlen( str );
         }
-        result.cstr[curr_pos] = 0;
-        free( arr );
+        va_end(_ap);
         return result;
     }
-    free( arr );
+    va_end(_ap);
     return (string_t) { 0 };
 }
 
@@ -165,14 +154,42 @@ string_t str_append( string_t start, string_t end )
 }
 
 
-string_t str_append_cstr( const char* start, const char* end )
+string_t str_appends( string_t start, ... )
 {
-    size_t start_len = strlen(start);
+    va_list ap, _ap;
+    va_start( ap, start );
+    va_copy( _ap, ap );
+    size_t length;
+    for ( string_t str = start; str.cstr != NULL; str = va_arg( ap, string_t ) )
+    {
+        length += start.length;
+    }
+    va_end(ap);
+    string_t result = { .length = length, .capacity = 16 };
+    if ( str_resize( &result, length ) )
+    {
+        size_t index = 0;
+        for ( string_t str = start; str.cstr != NULL; str = va_arg( _ap, string_t ) )
+        {
+            strcpy( result.cstr + index, str.cstr );
+            index += str.length;
+        }
+        va_end(_ap);
+        return result;
+    }
+    va_end(_ap);
+    return (string_t) { 0 };
+}
+
+
+string_t str_append_cstr( string_t start, const char* end )
+{
+    size_t start_len = start.length;
     size_t end_len = strlen(end);
     string_t result = { .capacity = 16 };
     if ( str_resize( &result, start_len + end_len ) )
     {
-        memmove( result.cstr, start, start_len );
+        memmove( result.cstr, start.cstr, start_len );
         memmove( result.cstr, end, end_len );
         result.cstr[ result.length ] = 0;
         return result;
@@ -219,7 +236,7 @@ string_t* str_split( string_t src, const char* needle )
 }
 
 
-void str_toupper( string_t* string )
+void str_to_upper( string_t* string )
 {
     for ( size_t i = 0; i < string->length; i++ )
     {
@@ -228,7 +245,7 @@ void str_toupper( string_t* string )
 }
 
 
-void str_tolower( string_t* string )
+void str_to_lower( string_t* string )
 {
     for ( size_t i = 0; i < string->length; i++ )
     {
