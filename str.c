@@ -9,8 +9,6 @@
 #endif  //USE_GC
 
 
-// struct str_cstr{ char* cstr; size_t length; };
-
 
 static inline bool str_resize( string_t* string, size_t size )
 {
@@ -194,6 +192,34 @@ string_t str_append_cstr( string_t start, const char* end )
         result.cstr[ result.length ] = 0;
         return result;
     }
+    return (string_t) { 0 };
+}
+
+
+string_t str_append_cstrs( string_t start, ... )
+{
+    va_list ap, _ap;
+    va_start( ap, start );
+    va_copy( _ap, ap );
+    size_t length = 0;
+    for ( char* string = start.cstr; string != NULL; string = va_arg( ap, char* ) )
+    {
+        length += strlen( string );
+    }
+    va_end(ap);
+    string_t result = { .length = length, .capacity = 16 };
+    if ( str_resize( &result, length ) )
+    {
+        size_t index = 0;
+        for ( char* string = start.cstr; string != NULL; string = va_arg( _ap, char* ) )
+        {
+            strcpy( result.cstr + index, string );
+            index += strlen( string );
+        }
+        va_end( _ap );
+        return result;
+    }
+    va_end( _ap );
     return (string_t) { 0 };
 }
 

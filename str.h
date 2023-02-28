@@ -49,6 +49,9 @@ string_t str_appends( string_t start, ... );
 // add null terminated c type string to string_t, return a string_t
 string_t str_append_cstr( string_t start, const char* end );
 
+// add null terminated c type strings to string_t, the last element has to be NULL, return a string_t
+string_t str_append_cstrs( string_t start, ... );
+
 // split src string upon needle string, returns an array of string_t with the last element being (string_t) { 0 }
 // the easiest way to check if the array ends is to check if `string_t.cstr == NULL`
 // caller free, call `void str_destroy_string_arr( string_t* str_arr )` first then call `free` on the returned pointer
