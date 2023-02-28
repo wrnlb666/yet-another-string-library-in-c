@@ -24,8 +24,11 @@ typedef struct string_t
 // constructor
 string_t str_new_string( char* src );
 
-// constructor that take in multiple null terminated strings at once, the last argument should be NULL
+// constructor that take in multiple null terminated strings at once, the last argument has to be NULL
 string_t str_new_strings( char* src, ... );
+
+// constructor that take in an array of c strings, the last element of the array has to be NULL
+string_t str_new_string_arr( char** src );
 
 // free memory allocated by string internally
 void str_destroy_string( string_t* string );
@@ -65,6 +68,9 @@ void str_to_lower( string_t* string );
 
 // return a substr starting from index start, with size size
 string_t str_substr( string_t src, size_t start, size_t size );
+
+// replace old with new, returning a new string_t, src is not changed
+string_t str_replace( string_t src, const char* old, const char* new );
 
 
 

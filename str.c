@@ -99,6 +99,28 @@ string_t str_new_strings( char* src, ... )
 }
 
 
+string_t str_new_string_arr( char** src )
+{
+    size_t length = 0;
+    for ( size_t i = 0; src[i] != NULL; i++ )
+    {
+        length += strlen(src[i]);
+    }
+    size_t index = 0;
+    string_t result = { .length = length, .capacity = 16 };
+    if ( str_resize( &result, length ) )
+    {
+        for ( size_t i = 0; src[i] != NULL; i++ )
+        {
+            strcpy( result.cstr + index, src[i] );
+            index += strlen( src[i] );
+        }
+        return result;
+    }
+    return (string_t) { 0 };
+}
+
+
 void str_destroy_string( string_t* string )
 {
     free( string->cstr );
@@ -253,8 +275,7 @@ string_t* str_split( string_t src, const char* needle )
     }
     tokens[index] = (string_t) { .length = strlen(str), .capacity = 16 };
     if ( !str_resize( &tokens[index], tokens[index].length ) ) return ( free(ptr), NULL );
-    strncpy( tokens[index].cstr, str, tokens[index].length );
-    tokens[index].cstr[ tokens[index].length ] = 0;
+    strcpy( tokens[index].cstr, str );
     index++;
     tokens[index] = (string_t) { 0 };
     free(ptr);
@@ -291,4 +312,73 @@ string_t str_substr( string_t src, size_t start, size_t size )
     strncpy( substr.cstr, src.cstr + start, size );
     substr.cstr[ substr.length ] = 0;
     return substr;
+}
+
+
+string_t str_replace( string_t src, const char* old_val, const char* new_val )
+{
+    // creating string arrays
+    size_t nlen = strlen( old_val );
+    char* str = malloc( sizeof (char) * ( src.length + 1 ) );
+    strncpy( str, src.cstr, src.length + 1 );
+    char* ptr = str;
+    size_t cap = 16;
+    char** tokens = malloc( sizeof (char*) * cap );
+    char* token;
+    size_t index = 0;
+    size_t counter = 0;
+    token = strstr( str, old_val );
+    while ( token != NULL )
+    {
+        *token = 0;
+        tokens[index] = malloc( sizeof (char) * ( strlen(str) + 1 ) );
+        strcpy( tokens[index], str );
+        str = token + nlen;
+        index++;
+        counter++;
+        token = strstr( str, old_val );
+        if ( index + 2 == cap )
+        {
+            cap += 16;
+            tokens = realloc( tokens, sizeof ( char* ) * cap );
+        }
+    }
+    tokens[index] = malloc( sizeof (char) * ( strlen(str) + 1 ) );
+    strcpy( tokens[index], str );
+    index++;
+    tokens[index] = NULL;
+    free(ptr);
+
+    // creating new string
+    size_t length = 0;
+    size_t new_len = strlen( new_val );
+    for ( size_t i = 0; tokens[i] != NULL; i++ )
+    {
+        length += strlen(tokens[i]);
+        length += new_len;
+    }
+    index = 0;
+    string_t result = { .length = length, .capacity = 16 };
+    if ( str_resize( &result, length ) )
+    {
+        for ( size_t i = 0; tokens[i] != NULL; i++ )
+        {
+            strcpy( result.cstr + index, tokens[i] );
+            index += strlen( tokens[i] );
+            if ( counter != i )
+            {
+                strcpy( result.cstr + index, new_val );
+                index += new_len;
+            }
+            free( tokens[i] );
+        }
+        free( tokens );
+        return result;
+    }
+    for ( size_t i = 0; tokens[i] != NULL; i++ )
+    {
+        free( tokens[i] );
+    }
+    free( tokens );
+    return (string_t) { 0 };
 }
