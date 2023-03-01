@@ -36,7 +36,7 @@ void str_destroy_string( string_t* string );
 // free multiple string at once, the last argument should be NULL
 void str_destroy_strings( string_t* string, ... );
 
-// free an array of string, the last element of the array has to be (string_t) { 0 }
+// free an array of string, the last element of the array has to be NULL
 // the array must be allocated on the heap since this function also calls free on the array. 
 // this function is intended to free the array returned by this library
 void str_destroy_string_arr( string_t** str_arr );
@@ -47,18 +47,17 @@ bool str_clear( string_t* string );
 // append two strings together, address can be overlapped
 string_t* str_append( const string_t* start, const string_t* end );
 
-// append strings together, the last element has to be (string_t) { 0 }
+// append strings together, the last element has to be NULL
 string_t* str_appends( const string_t* start, ... );
 
-// add null terminated c type string to string_t, return a string_t
+// add null terminated c type string to string_t, return a string_t*
 string_t* str_append_cstr( const string_t* start, const char* end );
 
-// add null terminated c type strings to string_t, the last element has to be NULL, return a string_t
+// add null terminated c type strings to string_t, the last element has to be NULL, return a string_t*
 string_t* str_append_cstrs( const string_t* start, ... );
 
-// split src string upon needle string, returns an array of string_t with the last element being (string_t) { 0 }
-// the easiest way to check if the array ends is to check if `string_t.cstr == NULL`
-// caller free, call `void str_destroy_string_arr( string_t* str_arr )` first then call `free` on the returned pointer
+// split src string upon needle string, returns an array of string_t with the last element being NULL
+// caller free, use `str_destroy_string_arr` to free the returned array
 string_t** str_split( const string_t* src, const char* needle );
 
 // set all the characters to upper case, UB if special characters

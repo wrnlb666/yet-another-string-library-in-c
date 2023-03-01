@@ -170,8 +170,8 @@ string_t* str_append( const string_t* start, const string_t* end )
     string_t* result = NULL;
     if ( str_resize( &result, length ) )
     {
-        memmove( result->cstr, start->cstr, start->length );
-        memmove( result->cstr + start->length, end->cstr, end->length );
+        strcpy( result->cstr, start->cstr );
+        strcpy( result->cstr + start->length, end->cstr );
         result->cstr[ result->length ] = 0;
         return result;
     }
@@ -187,7 +187,7 @@ string_t* str_appends( const string_t* start, ... )
     size_t length;
     for ( const string_t* str = start; str != NULL; str = va_arg( ap, string_t* ) )
     {
-        length += start->length;
+        length += str->length;
     }
     va_end(ap);
     string_t* result = NULL;
@@ -214,8 +214,8 @@ string_t* str_append_cstr( const string_t* start, const char* end )
     string_t* result = NULL;
     if ( str_resize( &result, start_len + end_len ) )
     {
-        memmove( result->cstr, start->cstr, start_len );
-        memmove( result->cstr, end, end_len );
+        strcpy( result->cstr, start->cstr );
+        strcpy( result->cstr + start_len, end );
         result->cstr[ result->length ] = 0;
         return result;
     }
@@ -329,6 +329,7 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
     char* ptr = str;
     size_t cap = 16;
     char** tokens = malloc( sizeof (char*) * cap );
+    size_t* part_len = malloc( sizeof (size_t) * cap );
     char* token;
     size_t index = 0;
     size_t counter = 0;
@@ -336,7 +337,8 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
     while ( token != NULL )
     {
         *token = 0;
-        tokens[index] = malloc( sizeof (char) * ( strlen(str) + 1 ) );
+        part_len[index] = strlen(str);
+        tokens[index] = malloc( sizeof (char) * ( part_len[index] + 1 ) );
         strcpy( tokens[index], str );
         str = token + old_len;
         index++;
@@ -346,9 +348,11 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
         {
             cap += 16;
             tokens = realloc( tokens, sizeof ( char* ) * cap );
+            part_len = realloc( part_len, sizeof (size_t) * cap );
         }
     }
-    tokens[index] = malloc( sizeof (char) * ( strlen(str) + 1 ) );
+    part_len[index] = strlen(str);
+    tokens[index] = malloc( sizeof (char) * ( part_len[index] + 1 ) );
     strcpy( tokens[index], str );
     index++;
     tokens[index] = NULL;
@@ -360,7 +364,10 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
     for ( size_t i = 0; tokens[i] != NULL; i++ )
     {
         length += strlen(tokens[i]);
-        length += new_len;
+        if ( counter != i )
+        {
+            length += new_len;
+        }
     }
     index = 0;
     string_t* result = NULL;
@@ -369,7 +376,7 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
         for ( size_t i = 0; tokens[i] != NULL; i++ )
         {
             strcpy( result->cstr + index, tokens[i] );
-            index += strlen( tokens[i] );
+            index += part_len[i];
             if ( counter != i )
             {
                 strcpy( result->cstr + index, new_val );
@@ -378,6 +385,7 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
             free( tokens[i] );
         }
         free( tokens );
+        free( part_len );
         return result;
     }
     for ( size_t i = 0; tokens[i] != NULL; i++ )
@@ -385,5 +393,6 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
         free( tokens[i] );
     }
     free( tokens );
+    free( part_len );
     return NULL;
 }
