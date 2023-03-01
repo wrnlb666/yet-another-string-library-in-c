@@ -68,7 +68,7 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
 
 ### example of using `str_split`:
 ```c
-string_t* str = str_new_strings( "Hello World", "  ", "woc", "  ", "abc", "  ", "123", NULL );
+string_t* str = str_new_strings( "Hello World", "  ", "😊😂😃😆🤔", "  ", "abc", "  ", "123", NULL );
 
 string_t** arr = str_split( str, "  " );
 for ( size_t i = 0; arr[i] != NULL; i++ )
