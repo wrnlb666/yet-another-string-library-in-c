@@ -5,7 +5,7 @@
 #include <gc/gc.h>
 #define malloc( size ) GC_malloc( size )
 #define realloc( ptr, size ) GC_realloc( ptr, size )
-#define free( ptr ) GC_free( ptr )
+#define free( ptr ) (void) ptr
 #endif  //USE_GC
 
 
@@ -155,7 +155,12 @@ void str_destroy_string_arr( string_t* str_arr )
 
 bool str_clear( string_t* string )
 {
-    return str_resize( string, 0 );
+    if ( str_resize( string, 0 ) )
+    {
+        memset( string->cstr, 0, sizeof (char) * 16 );
+        return true;
+    }
+    return false;
 }
 
 
@@ -318,7 +323,7 @@ string_t str_substr( string_t src, size_t start, size_t size )
 string_t str_replace( string_t src, const char* old_val, const char* new_val )
 {
     // creating string arrays
-    size_t nlen = strlen( old_val );
+    size_t old_len = strlen( old_val );
     char* str = malloc( sizeof (char) * ( src.length + 1 ) );
     strncpy( str, src.cstr, src.length + 1 );
     char* ptr = str;
@@ -333,7 +338,7 @@ string_t str_replace( string_t src, const char* old_val, const char* new_val )
         *token = 0;
         tokens[index] = malloc( sizeof (char) * ( strlen(str) + 1 ) );
         strcpy( tokens[index], str );
-        str = token + nlen;
+        str = token + old_len;
         index++;
         counter++;
         token = strstr( str, old_val );

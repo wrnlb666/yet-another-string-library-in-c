@@ -36,8 +36,9 @@ void str_destroy_string( string_t* string );
 // free multiple string at once, the last argument should be NULL
 void str_destroy_strings( string_t* string, ... );
 
-// free an array of string, the last element of the array should be (string_t) { 0 }, at least the capacity should be 0
+// free an array of string, the last element of the array has to be (string_t) { 0 }
 // the array must be allocated on the heap since this function also calls free on the array. 
+// this function is intended to free the array returned by this library
 void str_destroy_string_arr( string_t* str_arr );
 
 // effectivly clear the string, set the length to 0, may or may not change the capacity. 
