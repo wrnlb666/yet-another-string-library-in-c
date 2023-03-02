@@ -13,12 +13,7 @@
 
 
 // user should never change the value of length or capacity in the code. 
-typedef struct string_t
-{
-    size_t length;
-    size_t capacity;
-    char cstr[1];
-} string_t;
+typedef struct string_t string_t, *str_t;
 
 
 // constructor
@@ -41,8 +36,20 @@ void str_destroy_strings( string_t* string, ... );
 // this function is intended to free the array returned by this library
 void str_destroy_string_arr( string_t** str_arr );
 
+// get the length of the string, null terminater is not included
+size_t str_strlen( const string_t* string );
+
+// get the capacity of how many bytes the current container can hold
+size_t str_capacity( const string_t* string );
+
+// get a c type null terminated string from string
+char* str_cstr( const string_t* string );
+
 // effectivly clear the string, set the length to 0, may or may not change the capacity. 
 bool str_clear( string_t* string );
+
+// reserve memory that can hold at least length char, length+1 if count '\0'
+bool str_reserve( string_t* string, size_t length );
 
 // append two strings together, address can be overlapped
 string_t* str_append( const string_t* start, const string_t* end );

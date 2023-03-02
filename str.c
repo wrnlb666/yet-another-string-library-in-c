@@ -9,6 +9,15 @@
 #endif  //USE_GC
 
 
+// user should never change the value of length or capacity in the code. 
+typedef struct string_t
+{
+    size_t length;
+    size_t capacity;
+    char cstr[1];
+} string_t;
+
+
 
 static inline bool str_resize( string_t** string, size_t size )
 {
@@ -153,6 +162,24 @@ void str_destroy_string_arr( string_t** str_arr )
 }
 
 
+size_t str_strlen( const string_t* string )
+{
+    return (size_t) string->length;
+}
+
+
+size_t str_capacity( const string_t* string )
+{
+    return (size_t) string->capacity;
+}
+
+
+char* str_cstr( const string_t* string )
+{
+    return (char*) string->cstr;
+}
+
+
 bool str_clear( string_t* string )
 {
     if ( str_resize( &string, 0 ) )
@@ -161,6 +188,22 @@ bool str_clear( string_t* string )
         return true;
     }
     return false;
+}
+
+
+bool str_reserve( string_t* string, size_t length )
+{
+    size_t size = string->length;
+    if ( length <= size )
+    {
+        return true;
+    }
+    else
+    {
+        bool res = str_resize( &string, length );
+        string->length = size;
+        return res;
+    }
 }
 
 
