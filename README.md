@@ -3,7 +3,7 @@
 
 define `USE_GC` when compiling `str.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid calling any `str_destroy` functions. 
 
-### Basic APIs:
+### APIs:
 ```c
 // user should never change the value of length or capacity in the code. 
 typedef struct string_t
@@ -11,7 +11,7 @@ typedef struct string_t
     size_t length;
     size_t capacity;
     char cstr[1];
-} string_t;
+} string_t, *str_t;
 
 
 // get the length of the string, null terminater is not included
