@@ -14,6 +14,18 @@ typedef struct string_t
 } string_t;
 
 
+// get the length of the string, null terminater is not included
+size_t str_strlen( const string_t* string );
+
+// get the capacity of how many bytes the current container can hold
+size_t str_capacity( const string_t* string );
+
+// get a c type null terminated string from string
+char* str_cstr( const string_t* string );
+
+// get a wchar_t string from string, user free, probably useful on windows?
+wchar_t* str_wstr( const string_t* string );
+
 // constructor
 string_t* str_new_string( char* src );
 
@@ -36,6 +48,9 @@ void str_destroy_string_arr( string_t** str_arr );
 
 // effectivly clear the string, set the length to 0, may or may not change the capacity. 
 bool str_clear( string_t* string );
+
+// reserve memory that can hold at least length char, length+1 if count '\0'
+bool str_reserve( string_t* string, size_t length );
 
 // append two strings together, address can be overlapped
 string_t* str_append( const string_t* start, const string_t* end );
@@ -66,16 +81,38 @@ string_t* str_substr( const string_t* src, size_t start, size_t size );
 string_t* str_replace( const string_t* src, const char* old_val, const char* new_val );
 ```
 
-### example of using `str_split`:
+### example code:
 ```c
-string_t* str = str_new_strings( "Hello World", "  ", "😊😂😃😆🤔", "  ", "abc", "  ", "123", NULL );
+#include "str.h"
 
-string_t** arr = str_split( str, "  " );
-for ( size_t i = 0; arr[i] != NULL; i++ )
+int main( void )
 {
-    printf( "%zu, %zu, %s\n", arr[i]->length, arr[i]->capacity, arr[i]->cstr );
+    str_t str = str_new_strings( "Hello World", "  ", "😊😂😃😆🤔", "  ", "你好世界", "  ", "こんにちは世界", "  ", "헬로 월드", NULL );
+
+    str_t* arr = str_split( str, "  " );
+    for ( size_t i = 0; arr[i] != NULL; i++ )
+    {
+        printf( "%zu, %s\n", str_strlen( arr[i] ), str_cstr(arr[i]) );
+    }
+    str_destroy_string_arr( arr );
+
+    str_t str2 = str_replace( str, "  ", " " );
+    str_t str3 = str_substr( str2, 3, 8 );
+    str_t str4 = str_append_cstrs( str2, " ", "123", "456", NULL );
+
+    printf( "%zu, %s\n", str_strlen(str), str_cstr(str) );
+    printf( "%zu, %s\n", str_strlen(str2), str_cstr(str2) );
+    printf( "%zu, %s\n", str_strlen(str3), str_cstr(str3) );
+    printf( "%zu, %s\n", str_strlen(str4), str_cstr(str4) );
+
+    wchar_t* str5 = str_wstr( str );
+    wprintf( L"%ls", str5 );
+    free( str5 );
+
+
+    str_destroy_strings( str, str2, str3, str4, NULL );
+
+
+    return 0;
 }
-// the following two destroy function is not necessary if build with `-D USE_GC`
-str_destroy_string_arr( arr );
-str_destroy_string( str );
 ```
