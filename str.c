@@ -180,6 +180,24 @@ char* str_cstr( const string_t* string )
 }
 
 
+wchar_t* str_wstr( const string_t* string )
+{
+    wchar_t* res;
+    size_t size = mbstowcs( NULL, string->cstr, string->capacity );
+    if ( size != (size_t) -1 )
+    {
+        res = malloc( sizeof ( wchar_t ) * ( size + 1 ) );
+        if ( res != NULL )
+        {
+            mbstowcs( res, string->cstr, string->capacity );
+            return res;
+        }
+        return ( fputs( "[ERRO]: run out of memory", stderr ), NULL );
+    }
+    return ( fputs( "[ERRO]: invalid multibyte sequence\n", stderr ), NULL );
+}
+
+
 bool str_clear( string_t* string )
 {
     if ( str_resize( &string, 0 ) )
