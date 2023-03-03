@@ -52,6 +52,10 @@ void str_destroy_string_arr( string_t** str_arr );
 // effectivly clear the string, set the length to 0, may or may not change the capacity. 
 bool str_clear( string_t* string );
 
+// free the memory used by string, and at the same time return a new string.
+// e.g.: str = str_clear_to( str, "random string" );
+string_t* str_clear_to( string_t* string, const char* src );
+
 // reserve memory that can hold at least length char, length+1 if count '\0'
 bool str_reserve( string_t* string, size_t length );
 
@@ -61,11 +65,17 @@ string_t* str_append( const string_t* start, const string_t* end );
 // append strings together, the last element has to be NULL
 string_t* str_appends( const string_t* start, ... );
 
+// append an array of string_t to string_t, the last element of the array has to be NULL
+string_t* str_append_arr( const string_t* start, const string_t** str_arr );
+
 // add null terminated c type string to string_t, return a string_t*
 string_t* str_append_cstr( const string_t* start, const char* end );
 
 // add null terminated c type strings to string_t, the last element has to be NULL, return a string_t*
 string_t* str_append_cstrs( const string_t* start, ... );
+
+// add null terminated c type strings array to the end of string_t the last element of the array has to be NULL
+string_t* str_append_cstr_arr( const string_t* start, const char** arr );
 
 // split src string upon needle string, returns an array of string_t with the last element being NULL
 // caller free, use `str_destroy_string_arr` to free the returned array

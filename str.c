@@ -209,6 +209,13 @@ bool str_clear( string_t* string )
 }
 
 
+string_t* str_clear_to( string_t* string, const char* src )
+{
+    free( string );
+    return str_new_string( src );
+}
+
+
 bool str_reserve( string_t* string, size_t length )
 {
     size_t size = string->length;
@@ -268,6 +275,28 @@ string_t* str_appends( const string_t* start, ... )
 }
 
 
+string_t* str_append_arr( const string_t* start, const string_t** str_arr )
+{
+    size_t length = 0;
+    for ( size_t i = 0; str_arr[i] != NULL; i++ )
+    {
+        length += str_arr[i]->length;
+    }
+    string_t* result = NULL;
+    if ( str_resize( &result, length ) )
+    {
+        size_t index = 0;
+        for ( size_t i = 0; str_arr[i] != NULL; i++ )
+        {
+            strcpy( result->cstr + index, str_arr[i]->cstr );
+            index += str_arr[i]->length;
+        }
+        return result;
+    }
+    return NULL;
+}
+
+
 string_t* str_append_cstr( const string_t* start, const char* end )
 {
     size_t start_len = start->length;
@@ -309,6 +338,29 @@ string_t* str_append_cstrs( const string_t* start, ... )
     }
     va_end( _ap );
     return NULL;
+}
+
+
+string_t* str_append_cstr_arr( const string_t* start, const char** arr )
+{
+    size_t length = 0;
+    for ( size_t i = 0; arr[i] != NULL; i++ )
+    {
+        length += strlen( arr[i] );
+    }
+    string_t* result = NULL;
+    if ( str_resize( &result, length ) )
+    {
+        size_t index = 0;
+        for ( size_t i = 0; arr[i] != NULL; i++ )
+        {
+            strcpy( result->cstr + index, arr[i] );
+            index += strlen( arr[i] );
+        }
+        return result;
+    }
+    return NULL;
+
 }
 
 
