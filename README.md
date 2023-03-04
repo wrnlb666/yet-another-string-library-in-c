@@ -30,6 +30,9 @@ wchar_t* str_wstr( const string_t* string );
 // constructor
 string_t* str_new_string( const char* src );
 
+// construct using format string
+string_t* str_new_format( const char* format, ... );
+
 // constructor that take in multiple null terminated strings at once, the last argument has to be NULL
 string_t* str_new_strings( const char* src, ... );
 
@@ -98,6 +101,9 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
 // order does matter for "l" and "a", "la" and "al" will return different result
 bool str_sort( string_t** src, size_t size, const char* mode, ... );
 
+// compare str, 0 means the same
+int str_strcmp( const string_t* str1, const string_t* str2 );
+
 ```
 
 ### example code:
@@ -114,7 +120,9 @@ int compar( const void* arg1, const void* arg2 )
 
 int main( void )
 {
-    str_t str = str_new_strings( "Hello World", "  ", "😊😂😃😆🤔", "  ", "你好世界", "  ", "こんにちは世界", "  ", "헬로 월드", NULL );
+    // the following two expression are totally the same
+    // str_t str = str_new_strings( "Hello World", "  ", "😊😂😃😆🤔", "  ", "你好世界", "  ", "こんにちは世界", "  ", "헬로 월드", NULL );
+    str_t str = str_new_format( "%s  %s  %s  %s  %s", "Hello World", "😊😂😃😆🤔", "你好世界", "こんにちは世界", "헬로 월드" );
 
     str_t* arr = str_split( str, "  " );
     printf( "string slices: \n" );
@@ -123,7 +131,7 @@ int main( void )
         printf( "%zu, %s\n", str_strlen( arr[i] ), str_cstr(arr[i]) );
     }
     str_sort( arr, 0, "c", &compar );
-    printf( "sorted: \n" );
+    printf( "\nsorted: \n" );
     for ( size_t i = 0; arr[i] != NULL; i++ )
     {
         printf( "%zu, %s\n", str_strlen( arr[i] ), str_cstr(arr[i]) );
@@ -135,7 +143,7 @@ int main( void )
     str_t str3 = str_substr( str2, 3, 8 );
     str_t str4 = str_append_cstrs( str2, " ", "123", "456", NULL );
 
-    printf( "info for changes:\n" );
+    printf( "\ninfo for changes:\n" );
     printf( "%zu, %s\n", str_strlen(str), str_cstr(str) );
     printf( "%zu, %s\n", str_strlen(str2), str_cstr(str2) );
     printf( "%zu, %s\n", str_strlen(str3), str_cstr(str3) );
