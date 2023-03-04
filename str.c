@@ -22,10 +22,16 @@ typedef struct string_t
 static inline bool str_resize( string_t** string, size_t size )
 {
     size_t cap;
+    size_t capacity;
     if ( *string == NULL )
     {
         *string = malloc( sizeof ( string_t ) );
         (*string)->capacity = 16;
+        capacity = 0;
+    }
+    else
+    {
+        capacity = (*string)->capacity;
     }
     (*string)->length = size;
     if ( size < 16 ) cap = 16;
@@ -43,8 +49,9 @@ static inline bool str_resize( string_t** string, size_t size )
                 (*string)->capacity += 512;
             }
         }
+        if ( (*string)->capacity == capacity ) return true;
         (*string) = realloc( (*string), sizeof ( string_t ) + sizeof ( char ) * ( (*string)->capacity - 1 ) );
-        if ( (*string) == NULL ) return ( fputs( "[ERRO]: run out of memory", stderr ), false );
+        if ( (*string) == NULL ) return ( fputs( "[ERRO]: run out of memory\n", stderr ), false );
     }
     else
     {
@@ -64,15 +71,16 @@ static inline bool str_resize( string_t** string, size_t size )
             }
             else break;
         }
+        if ( (*string)->capacity == capacity ) return true;
         *string = realloc( *string, sizeof ( string_t ) + sizeof ( char ) * ( (*string)->capacity - 1 ) );
-        if ( (*string) == NULL ) return ( fputs( "[ERRO]: run out of memory", stderr ), false );
+        if ( (*string) == NULL ) return ( fputs( "[ERRO]: run out of memory\n", stderr ), false );
     }
     (*string)->cstr[ (*string)->length ] = 0;
     return true;
 }
 
 
-string_t* str_new_string( char* src )
+string_t* str_new_string( const char* src )
 {
     string_t* string = NULL;
     if ( str_resize( &string, strlen(src) ) )
@@ -84,13 +92,13 @@ string_t* str_new_string( char* src )
 }
 
 
-string_t* str_new_strings( char* src, ... )
+string_t* str_new_strings( const char* src, ... )
 {
     va_list ap, _ap;
     va_start( ap, src );
     va_copy( _ap, ap );
     size_t length = 0;
-    for ( char* str = src; str != NULL; str = va_arg( ap, char* ) )
+    for ( const char* str = src; str != NULL; str = va_arg( ap, char* ) )
     {
         length += strlen(str);
     }
@@ -99,7 +107,7 @@ string_t* str_new_strings( char* src, ... )
     string_t* result = NULL;
     if ( str_resize( &result, length ) )
     {
-        for ( char* str = src; str!= NULL; str = va_arg( _ap, char* ) )
+        for ( const char* str = src; str!= NULL; str = va_arg( _ap, char* ) )
         {
             strcpy( result->cstr + index, str );
             index += strlen( str );
@@ -112,7 +120,7 @@ string_t* str_new_strings( char* src, ... )
 }
 
 
-string_t* str_new_string_arr( char** src )
+string_t* str_new_string_arr( const char** src )
 {
     size_t length = 0;
     for ( size_t i = 0; src[i] != NULL; i++ )
@@ -134,13 +142,35 @@ string_t* str_new_string_arr( char** src )
 }
 
 
-void str_destroy_string( string_t* string )
+string_t* str_new_string_narr( const char** src, size_t size )
+{
+    size_t length = 0;
+    for ( size_t i = 0; i < size; i++ )
+    {
+        length += strlen(src[i]);
+    }
+    size_t index = 0;
+    string_t* result = NULL;
+    if ( str_resize( &result, length ) )
+    {
+        for ( size_t i = 0; src[i] != NULL; i++ )
+        {
+            strcpy( result->cstr + index, src[i] );
+            index += strlen( src[i] );
+        }
+        return result;
+    }
+    return NULL;
+}
+
+
+void str_free( void* string )
 {
     free( string );
 }
 
 
-void str_destroy_strings( string_t* string, ... )
+void str_frees( string_t* string, ... )
 {
     va_list ap;
     va_start( ap, string );
@@ -152,7 +182,7 @@ void str_destroy_strings( string_t* string, ... )
 }
 
 
-void str_destroy_string_arr( string_t** str_arr )
+void str_free_arr( string_t** str_arr )
 {
     for ( size_t i = 0; str_arr[i] != NULL; i++ )
     {
@@ -192,7 +222,7 @@ wchar_t* str_wstr( const string_t* string )
             mbstowcs( res, string->cstr, string->capacity );
             return res;
         }
-        return ( fputs( "[ERRO]: run out of memory", stderr ), NULL );
+        return ( fputs( "[ERRO]: run out of memory\n", stderr ), NULL );
     }
     return ( fputs( "[ERRO]: invalid multibyte sequence\n", stderr ), NULL );
 }
@@ -275,28 +305,6 @@ string_t* str_appends( const string_t* start, ... )
 }
 
 
-string_t* str_append_arr( const string_t* start, const string_t** str_arr )
-{
-    size_t length = 0;
-    for ( size_t i = 0; str_arr[i] != NULL; i++ )
-    {
-        length += str_arr[i]->length;
-    }
-    string_t* result = NULL;
-    if ( str_resize( &result, length ) )
-    {
-        size_t index = 0;
-        for ( size_t i = 0; str_arr[i] != NULL; i++ )
-        {
-            strcpy( result->cstr + index, str_arr[i]->cstr );
-            index += str_arr[i]->length;
-        }
-        return result;
-    }
-    return NULL;
-}
-
-
 string_t* str_append_cstr( const string_t* start, const char* end )
 {
     size_t start_len = start->length;
@@ -338,29 +346,6 @@ string_t* str_append_cstrs( const string_t* start, ... )
     }
     va_end( _ap );
     return NULL;
-}
-
-
-string_t* str_append_cstr_arr( const string_t* start, const char** arr )
-{
-    size_t length = 0;
-    for ( size_t i = 0; arr[i] != NULL; i++ )
-    {
-        length += strlen( arr[i] );
-    }
-    string_t* result = NULL;
-    if ( str_resize( &result, length ) )
-    {
-        size_t index = 0;
-        for ( size_t i = 0; arr[i] != NULL; i++ )
-        {
-            strcpy( result->cstr + index, arr[i] );
-            index += strlen( arr[i] );
-        }
-        return result;
-    }
-    return NULL;
-
 }
 
 
@@ -423,13 +408,29 @@ string_t* str_substr( const string_t* src, size_t start, size_t size )
 {
     if ( start + size > src->length )
     {
-        return ( fputs( "[ERRO]: substring out of bound!", stderr ), NULL );
+        return ( fputs( "[ERRO]: substring out of bound!\n", stderr ), NULL );
     }
     string_t* substr = NULL;
-    str_resize( &substr, size );
-    strncpy( substr->cstr, src->cstr + start, size );
-    substr->cstr[ substr->length ] = 0;
-    return substr;
+    if ( str_resize( &substr, size ) )
+    {
+        strncpy( substr->cstr, src->cstr + start, size );
+        substr->cstr[ substr->length ] = 0;
+        return substr;
+    }
+    return NULL;
+}
+
+
+string_t* str_strcpy( const string_t* src )
+{
+    string_t* new_str = NULL;
+    if ( str_resize( &new_str, src->length ) )
+    {
+        strcpy( new_str->cstr, src->cstr );
+        new_str->cstr[ new_str->length ] = 0;
+        return new_str;
+    }
+    return NULL;
 }
 
 
@@ -508,4 +509,165 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
     free( tokens );
     free( part_len );
     return NULL;
+}
+
+
+// built in compare function for str_sort and str_sorted
+static inline int str_cmp_l( const void* arg1, const void* arg2 )
+{
+    string_t* str1 = *(string_t**) arg1;
+    string_t* str2 = *(string_t**) arg2;
+    return ( str1->length - str2->length );
+}
+static inline int str_cmp_a( const void* arg1, const void* arg2 )
+{
+    string_t* str1 = *(string_t**) arg1;
+    string_t* str2 = *(string_t**) arg2;
+    for ( size_t i = 0; i <= str1->length && i <= str2->length; i++ )
+    {
+        if ( str1->cstr[i] != str2->cstr[i] )
+        {
+            return str1->cstr[i] - str2->cstr[i];
+        }
+    }
+    return 0;
+}
+static inline int str_cmp_la( const void* arg1, const void* arg2 )
+{
+    string_t* str1 = *(string_t**) arg1;
+    string_t* str2 = *(string_t**) arg2;
+    if ( str1->length != str2->length )
+    {
+        return str1->length - str2->length;
+    }
+    else
+    {
+        for ( size_t i = 0; i < str1->length; i++ )
+        {
+            if ( str1->cstr[i] != str2->cstr[i] )
+            {
+                return str1->cstr[i] - str2->cstr[i];
+            }
+        }
+    }
+    return 0;
+}
+static inline int str_cmp_ai( const void* arg1, const void* arg2 )
+{
+    string_t* str1 = *(string_t**) arg1;
+    string_t* str2 = *(string_t**) arg2;
+    for ( size_t i = 0; i <= str1->length && i <= str2->length; i++ )
+    {
+        if ( toupper( str1->cstr[i] ) != toupper( str2->cstr[i] ) )
+        {
+            return toupper( str1->cstr[i] ) - toupper( str2->cstr[i] );
+        }
+    }
+    return 0;
+}
+static inline int str_cmp_lai( const void* arg1, const void* arg2 )
+{
+    string_t* str1 = *(string_t**) arg1;
+    string_t* str2 = *(string_t**) arg2;
+    if ( str1->length != str2->length )
+    {
+        return str1->length - str2->length;
+    }
+    else
+    {
+        for ( size_t i = 0; i < str1->length; i++ )
+        {
+            if ( toupper( str1->cstr[i] ) != toupper( str2->cstr[i] ) )
+            {
+                return toupper( str1->cstr[i] ) - toupper( str2->cstr[i] );
+            }
+        }
+    }
+    return 0;
+}
+
+bool str_sort( string_t** src, size_t size, const char* mode, ... )
+{
+    enum modes
+    {
+        c, i, l, a, la, modes_max
+    };
+    bool option[ modes_max ] = { 0 };
+    for ( const char *ch = mode; *ch != 0; ch++ )
+    {
+        if ( *ch == 'c' )
+        {
+            option[c] = true;
+            break;
+        }
+        else if ( *ch == 'i' )
+        {
+            option[i] = true;
+        }
+        else if ( *ch == 'l' )
+        {
+            if ( option[a] == true )
+            {
+                continue;
+            }
+            else
+            {
+                option[l] = true;
+            }
+        }
+        else if ( *ch == 'a' )
+        {
+            if ( option[l] == true )
+            {
+                option[l] = false;
+                option[la] = true;
+            }
+            else
+            {
+                option[a] = true;
+            }
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid mode\n", stderr ), false );
+        }
+    }
+    if ( size == 0 )
+    {
+        for ( ; src[size]!= NULL; size++ );
+    }
+    int (*compar)(const void *, const void *);
+    if ( option[c] == true )
+    {
+        va_list ap;
+        va_start( ap, mode );
+        compar = va_arg( ap, int (*)(const void *, const void *) );
+        va_end(ap);
+    }
+    else if ( option[l] == true )
+    {
+        compar = str_cmp_l;
+    }
+    else if ( option[a] == true && option[i] == false )
+    {
+        compar = str_cmp_a;
+    }
+    else if ( option[a] == true && option[i] == true )
+    {
+        compar = str_cmp_ai;
+    }
+    else if ( option[la] == true )
+    {
+        compar = str_cmp_la;
+    }
+    else if ( option[la] == true && option[i] == true )
+    {
+        compar = str_cmp_lai;
+    }
+    else
+    {
+        return ( fputs( "[ERRO]: invalid mode\n", stderr ), false );
+    }
+    qsort( src, size, sizeof (string_t*), compar );
+    return true;
 }
