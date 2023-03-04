@@ -33,6 +33,9 @@ wchar_t* str_wstr( const string_t* string );
 // constructor
 string_t* str_new_string( const char* src );
 
+// construct using format string
+string_t* str_new_format( const char* format, ... );
+
 // constructor that take in multiple null terminated strings at once, the last argument has to be NULL
 string_t* str_new_strings( const char* src, ... );
 
@@ -100,6 +103,9 @@ string_t* str_replace( const string_t* src, const char* old_val, const char* new
 // if used c, other modes will be ignored
 // order does matter for "l" and "a", "la" and "al" will return different result
 bool str_sort( string_t** src, size_t size, const char* mode, ... );
+
+// compare str, 0 means the same
+int str_strcmp( const string_t* str1, const string_t* str2 );
 
 
 

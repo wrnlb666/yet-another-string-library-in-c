@@ -10,12 +10,12 @@
 
 
 // user should never change the value of length or capacity in the code. 
-typedef struct string_t
+struct string_t
 {
     size_t length;
     size_t capacity;
     char cstr[1];
-} string_t;
+};
 
 
 
@@ -86,6 +86,24 @@ string_t* str_new_string( const char* src )
     if ( str_resize( &string, strlen(src) ) )
     {
         strcpy( string->cstr, src );
+        return string;
+    }
+    return NULL;
+}
+
+
+string_t* str_new_format( const char* format, ... )
+{
+    va_list ap, _ap;
+    va_start( ap, format );
+    va_copy( _ap, ap );
+    size_t size = vsnprintf( NULL, 0, format, ap );
+    va_end(ap);
+    string_t* string = NULL;
+    if ( str_resize( &string, size ) )
+    {
+        vsnprintf( string->cstr, string->capacity, format, _ap );
+        va_end(_ap);
         return string;
     }
     return NULL;
@@ -282,7 +300,7 @@ string_t* str_appends( const string_t* start, ... )
     va_list ap, _ap;
     va_start( ap, start );
     va_copy( _ap, ap );
-    size_t length;
+    size_t length = 0;
     for ( const string_t* str = start; str != NULL; str = va_arg( ap, string_t* ) )
     {
         length += str->length;
@@ -670,4 +688,17 @@ bool str_sort( string_t** src, size_t size, const char* mode, ... )
     }
     qsort( src, size, sizeof (string_t*), compar );
     return true;
+}
+
+
+int str_strcmp( const string_t* str1, const string_t* str2 )
+{
+    for ( size_t i = 0; i <= str1->length && i <= str2->length; i++ )
+    {
+        if ( str1->cstr[i] != str2->cstr[i] )
+        {
+            return str1->cstr[i] - str2->cstr[i];
+        }
+    }
+    return 0;
 }
