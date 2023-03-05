@@ -257,10 +257,10 @@ bool str_clear( string_t* string )
 }
 
 
-string_t* str_clear_to( string_t* string, const char* src )
+string_t* str_clear_to( string_t* old, string_t* new )
 {
-    free( string );
-    return str_new_string( src );
+    free( old );
+    return new;
 }
 
 
@@ -702,3 +702,5 @@ int str_strcmp( const string_t* str1, const string_t* str2 )
     }
     return 0;
 }
+
+

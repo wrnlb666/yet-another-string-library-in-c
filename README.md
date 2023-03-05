@@ -57,8 +57,8 @@ void str_free_arr( string_t** str_arr );
 bool str_clear( string_t* string );
 
 // free the memory used by string, and at the same time return a new string.
-// e.g.: str = str_clear_to( str, "random string" );
-string_t* str_clear_to( string_t* string, const char* src );
+// e.g.: str = str_clear_to( str, str_new_format( "random string" ) );
+string_t* str_clear_to( string_t* old, string_t* new );
 
 // reserve memory that can hold at least length char, length+1 if count '\0'
 bool str_reserve( string_t* string, size_t length );
