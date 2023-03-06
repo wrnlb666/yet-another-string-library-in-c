@@ -426,7 +426,7 @@ string_t* str_substr( const string_t* src, size_t start, size_t size )
 {
     if ( start + size > src->length )
     {
-        return ( fputs( "[ERRO]: substring out of bound!\n", stderr ), NULL );
+        return ( fputs( "[ERRO]: index out of bound\n", stderr ), NULL );
     }
     string_t* substr = NULL;
     if ( str_resize( &substr, size ) )
@@ -446,6 +446,25 @@ string_t* str_strcpy( const string_t* src )
     {
         strcpy( new_str->cstr, src->cstr );
         new_str->cstr[ new_str->length ] = 0;
+        return new_str;
+    }
+    return NULL;
+}
+
+
+string_t* str_insert( const string_t* src, size_t index, const char* in )
+{
+    if ( index > src->length )
+    {
+        return ( fputs( "[ERRO]: index out of bound\n", stderr ), NULL );
+    }
+    size_t size = strlen(in);
+    string_t* new_str = NULL;
+    if ( str_resize( &new_str, src->length + size ) )
+    {
+        memmove( new_str->cstr, src->cstr, index );
+        memmove( new_str->cstr + index, in, size );
+        memmove( new_str->cstr + index + size, src->cstr + index, src->length - index + 1 );
         return new_str;
     }
     return NULL;
