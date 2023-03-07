@@ -32,20 +32,22 @@ int main( void )
     str_t str2 = str_replace( str, "  ", " " );
     str_t str3 = str_substr( str2, 3, 8 );
     str_t str4 = str_append_cstrs( str2, " ", "123", "456", NULL );
+    str_t str5 = str_insert( str3, 2, "l" );
 
     printf( "\ninfo for changes:\n" );
     printf( "%zu, %s\n", str_strlen(str), str_cstr(str) );
     printf( "%zu, %s\n", str_strlen(str2), str_cstr(str2) );
     printf( "%zu, %s\n", str_strlen(str3), str_cstr(str3) );
     printf( "%zu, %s\n", str_strlen(str4), str_cstr(str4) );
+    printf( "%zu, %s\n", str_strlen(str5), str_cstr(str5) );
 
-    wchar_t* str5 = str_wstr( str );
-    wprintf( L"%ls", str5 );
+    wchar_t* wstr = str_wstr( str );
+    wprintf( L"%ls", wstr );
     // not necessary if define USE_GC
-    str_free( str5 );
+    str_free( wstr );
 
     // not necessary if define USE_GC
-    str_frees( str, str2, str3, str4, NULL );
+    str_frees( str, str2, str3, str4, str5, NULL );
 
     return 0;
 }
