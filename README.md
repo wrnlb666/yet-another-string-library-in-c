@@ -91,6 +91,9 @@ string_t* str_substr( const string_t* src, size_t start, size_t size );
 // copy a string, return a new string
 string_t* str_strcpy( const string_t* src );
 
+// insert a c string into src at index index, returning the new string
+string_t* str_insert( const string_t* src, size_t index, const char* in );
+
 // replace old with new, returning a new string_t, src is not changed
 string_t* str_replace( const string_t* src, const char* old_val, const char* new_val );
 
