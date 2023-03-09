@@ -723,3 +723,23 @@ int str_strcmp( const string_t* str1, const string_t* str2 )
 }
 
 
+bool str_start_with( const string_t* self, const char* str )
+{
+    size_t size = strlen( str );
+    if ( self->length < size )
+    {
+        return false;
+    }
+    return ( memcmp( self->cstr, str, size ) == 0 ? true: false );
+}
+
+
+bool str_end_with( const string_t* self, const char* str )
+{
+    size_t size = strlen( str );
+    if ( self->length < size )
+    {
+        return false;
+    }
+    return ( memcmp( self->cstr + ( self->length - size ), str, size ) == 0 ? true : false );
+}
