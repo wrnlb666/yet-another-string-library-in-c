@@ -280,7 +280,7 @@ bool str_reserve( string_t* string, size_t length )
 }
 
 
-string_t* str_append( const string_t* start, const string_t* end )
+string_t* str_appended( const string_t* start, const string_t* end )
 {
     size_t length = start->length + end->length;
     string_t* result = NULL;
@@ -295,7 +295,7 @@ string_t* str_append( const string_t* start, const string_t* end )
 }
 
 
-string_t* str_appends( const string_t* start, ... )
+string_t* str_appendeds( const string_t* start, ... )
 {
     va_list ap, _ap;
     va_start( ap, start );
@@ -323,7 +323,7 @@ string_t* str_appends( const string_t* start, ... )
 }
 
 
-string_t* str_append_cstr( const string_t* start, const char* end )
+string_t* str_appended_cstr( const string_t* start, const char* end )
 {
     size_t start_len = start->length;
     size_t end_len = strlen(end);
@@ -339,7 +339,7 @@ string_t* str_append_cstr( const string_t* start, const char* end )
 }
 
 
-string_t* str_append_cstrs( const string_t* start, ... )
+string_t* str_appended_cstrs( const string_t* start, ... )
 {
     va_list ap, _ap;
     va_start( ap, start );
@@ -452,7 +452,7 @@ string_t* str_strcpy( const string_t* src )
 }
 
 
-string_t* str_insert( const string_t* src, size_t index, const char* in )
+string_t* str_inserted( const string_t* src, size_t index, const char* in )
 {
     if ( index > src->length )
     {
@@ -471,7 +471,7 @@ string_t* str_insert( const string_t* src, size_t index, const char* in )
 }
 
 
-string_t* str_replace( const string_t* src, const char* old_val, const char* new_val )
+string_t* str_replaced( const string_t* src, const char* old_val, const char* new_val )
 {
     // creating string arrays
     size_t old_len = strlen( old_val );
@@ -742,4 +742,14 @@ bool str_end_with( const string_t* self, const char* str )
         return false;
     }
     return ( memcmp( self->cstr + ( self->length - size ), str, size ) == 0 ? true : false );
+}
+
+
+bool str_has( const string_t* self, const char* str )
+{
+    if ( strstr( self->cstr, str ) )
+    {
+        return true;
+    }
+    return false;
 }

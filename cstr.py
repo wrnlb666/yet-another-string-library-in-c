@@ -40,8 +40,8 @@ lib.str_clear.restype = c_bool
 lib.str_clear.argtype = [ POINTER(string_t) ]
 
 # string_t* str_append( const string_t* start, const string_t* end );
-lib.str_append.restype = POINTER(string_t)
-lib.str_append.argtype = [ POINTER(string_t), POINTER(string_t) ]
+lib.str_appended.restype = POINTER(string_t)
+lib.str_appended.argtype = [ POINTER(string_t), POINTER(string_t) ]
 
 # string_t** str_split( const string_t* src, const char* needle );
 lib.str_split.restype = POINTER( POINTER(string_t) )
@@ -60,8 +60,8 @@ lib.str_substr.restype = POINTER(string_t)
 lib.str_substr.argtype = [ POINTER(string_t), c_size_t, c_size_t ]
 
 # string_t* str_replace( const string_t* src, const char* old_val, const char* new_val );
-lib.str_replace.restype = POINTER(string_t)
-lib.str_replace.argtype = [ POINTER(string_t), c_char_p, c_char_p ]
+lib.str_replaced.restype = POINTER(string_t)
+lib.str_replaced.argtype = [ POINTER(string_t), c_char_p, c_char_p ]
 
 
 
@@ -74,7 +74,7 @@ class str_t:
         elif isinstance( string, POINTER(string_t) ):
             self.string = string
         else:
-            raise TypeError(f"Invalid argument type: {type(string)}")
+            raise TypeError( f"Invalid argument type: {type(string)}" )
 
 
     def len( self ) -> int:
@@ -99,11 +99,14 @@ class str_t:
         return bool( lib.str_clear(self.string) )
     
     def __add__( self, other: "str_t" ) -> "str_t":
-        return str_t( lib.str_append( self.string, other.string ) )
+        if isinstance( other, str_t ):
+            return str_t( lib.str_appended( self.string, other.string ) )
+        else:
+            raise TypeError( f"Invalid argument type: {type(other)}" )
     
     def split(self, needle: str) -> list:
         l = []
-        res = lib.str_split(self.string, c_char_p(bytes(needle, "UTF-8")))
+        res = lib.str_split( self.string, c_char_p( bytes( needle, "UTF-8" ) ) )
         i = 0
         while res[i]:
             curr_ptr = res[i]
@@ -121,5 +124,5 @@ class str_t:
         return str_t( lib.str_substr( self.string, c_size_t(start), c_size_t(size) ) )
     
     def replace( self, old: str, new: str ) -> "str_t":
-        return str_t( lib.str_replace( self.string, c_char_p( bytes( old, "UTF-8" ) ), c_char_p( bytes( new, "UTF-8" ) ) ) )
+        return str_t( lib.str_replaced( self.string, c_char_p( bytes( old, "UTF-8" ) ), c_char_p( bytes( new, "UTF-8" ) ) ) )
     

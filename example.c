@@ -29,10 +29,10 @@ int main( void )
     // not necessary if define USE_GC
     str_free_arr( arr );
 
-    str_t str2 = str_replace( str, "  ", " " );
+    str_t str2 = str_replaced( str, "  ", " " );
     str_t str3 = str_substr( str2, 3, 8 );
-    str_t str4 = str_append_cstrs( str2, " ", "123", "456", NULL );
-    str_t str5 = str_insert( str3, 2, "l" );
+    str_t str4 = str_appended_cstrs( str2, " ", "123", "456", NULL );
+    str_t str5 = str_inserted( str3, 2, "l" );
 
     printf( "\ninfo for changes:\n" );
     printf( "%zu, %s\n", str_strlen(str), str_cstr(str) );
@@ -40,6 +40,7 @@ int main( void )
     printf( "%zu, %s\n", str_strlen(str3), str_cstr(str3) );
     printf( "%zu, %s\n", str_strlen(str4), str_cstr(str4) );
     printf( "%zu, %s\n", str_strlen(str5), str_cstr(str5) );
+    printf( "%d, %d\n", str_start_with( str5, "lol" ), str_end_with( str5, " World" ) );
 
     wchar_t* wstr = str_wstr( str );
     wprintf( L"%ls", wstr );

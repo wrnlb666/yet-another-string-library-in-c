@@ -67,16 +67,16 @@ string_t* str_clear_to( string_t* old, string_t* new );
 bool str_reserve( string_t* string, size_t length );
 
 // append two strings together, address can be overlapped
-string_t* str_append( const string_t* start, const string_t* end );
+string_t* str_appended( const string_t* start, const string_t* end );
 
 // append strings together, the last element has to be NULL
-string_t* str_appends( const string_t* start, ... );
+string_t* str_appendeds( const string_t* start, ... );
 
 // add null terminated c type string to string_t, return a string_t*
-string_t* str_append_cstr( const string_t* start, const char* end );
+string_t* str_appended_cstr( const string_t* start, const char* end );
 
 // add null terminated c type strings to string_t, the last element has to be NULL, return a string_t*
-string_t* str_append_cstrs( const string_t* start, ... );
+string_t* str_appended_cstrs( const string_t* start, ... );
 
 // split src string upon needle string, returns an array of string_t with the last element being NULL
 // caller free, use `str_destroy_string_arr` to free the returned array
@@ -95,10 +95,10 @@ string_t* str_substr( const string_t* src, size_t start, size_t size );
 string_t* str_strcpy( const string_t* src );
 
 // insert a c string into src at index index, returning the new string
-string_t* str_insert( const string_t* src, size_t index, const char* in );
+string_t* str_inserted( const string_t* src, size_t index, const char* in );
 
 // replace old with new, returning a new string_t, src is not changed
-string_t* str_replace( const string_t* src, const char* old_val, const char* new_val );
+string_t* str_replaced( const string_t* src, const char* old_val, const char* new_val );
 
 // sort string array of size size, if size is 0, then the array has to be NULL terminated
 // mode should be l for length, a for alphabetical, i for ignore case, c for custom
@@ -115,6 +115,9 @@ bool str_start_with( const string_t* self, const char* str );
 
 // return if the string end with the input c string
 bool str_end_with( const string_t* self, const char* str );
+
+// return if the substring presents in the string_t
+bool str_has( const string_t* self, const char* str );
 
 
 
