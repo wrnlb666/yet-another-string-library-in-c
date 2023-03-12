@@ -69,6 +69,9 @@ bool str_reserve( string_t* string, size_t length );
 // append two strings together, address can be overlapped
 string_t* str_appended( const string_t* start, const string_t* end );
 
+// the same as above, but changes the original string
+string_t* str_append( string_t** start, const string_t* end );
+
 // append strings together, the last element has to be NULL
 string_t* str_appendeds( const string_t* start, ... );
 

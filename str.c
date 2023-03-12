@@ -288,8 +288,19 @@ string_t* str_appended( const string_t* start, const string_t* end )
     {
         strcpy( result->cstr, start->cstr );
         strcpy( result->cstr + start->length, end->cstr );
-        result->cstr[ result->length ] = 0;
         return result;
+    }
+    return NULL;
+}
+
+
+string_t* str_append( string_t** start, const string_t* end )
+{
+    size_t length = (*start)->length;
+    if ( str_resize( start, (*start)->length + end->length ) )
+    {
+        strcpy( (*start)->cstr + length, end->cstr );
+        return start;
     }
     return NULL;
 }
