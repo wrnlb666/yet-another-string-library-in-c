@@ -75,11 +75,20 @@ string_t* str_append( string_t** start, const string_t* end );
 // append strings together, the last element has to be NULL
 string_t* str_appendeds( const string_t* start, ... );
 
+// the same as above, but changes the original string
+string_t* str_appends( string_t** start, ... );
+
 // add null terminated c type string to string_t, return a string_t*
 string_t* str_appended_cstr( const string_t* start, const char* end );
 
+// the same as above, but changes the original string
+string_t* str_append_cstr( string_t** start, const char* end );
+
 // add null terminated c type strings to string_t, the last element has to be NULL, return a string_t*
 string_t* str_appended_cstrs( const string_t* start, ... );
+
+// the same as above, but changes the original string
+string_t* str_append_cstrs( string_t** start, ... );
 
 // split src string upon needle string, returns an array of string_t with the last element being NULL
 // caller free, use `str_destroy_string_arr` to free the returned array

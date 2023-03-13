@@ -337,6 +337,33 @@ string_t* str_appendeds( const string_t* start, ... )
 }
 
 
+string_t* str_appends( string_t** start, ... )
+{
+    va_list ap, _ap;
+    va_start( ap, start );
+    va_copy( _ap, ap );
+    size_t length = 0;
+    for ( const string_t* str = *start; str != NULL; str = va_arg( ap, string_t* ) )
+    {
+        length += str->length;
+    }
+    va_end(ap);
+    size_t index = (*start)->length;
+    if ( str_resize( start, length ) )
+    {
+        for ( const string_t* str = va_arg( _ap, string_t* ); str != NULL; str = va_arg( _ap, string_t* ) )
+        {
+            strcpy( (*start)->cstr + index, str->cstr );
+            index += str->length;
+        }
+        va_end(_ap);
+        return *start;
+    }
+    va_end(_ap);
+    return NULL;
+}
+
+
 string_t* str_appended_cstr( const string_t* start, const char* end )
 {
     size_t start_len = start->length;
@@ -348,6 +375,19 @@ string_t* str_appended_cstr( const string_t* start, const char* end )
         strcpy( result->cstr + start_len, end );
         result->cstr[ result->length ] = 0;
         return result;
+    }
+    return NULL;
+}
+
+
+string_t* str_append_cstr( string_t** start, const char* end )
+{
+    size_t start_len = (*start)->length;
+    size_t end_len = strlen(end);
+    if ( str_resize( start, (*start)->length + end_len ) )
+    {
+        strcpy( (*start)->cstr + start_len, end );
+        return *start;
     }
     return NULL;
 }
@@ -375,6 +415,33 @@ string_t* str_appended_cstrs( const string_t* start, ... )
         }
         va_end( _ap );
         return result;
+    }
+    va_end( _ap );
+    return NULL;
+}
+
+
+string_t* str_append_cstrs( string_t** start, ... )
+{
+    va_list ap, _ap;
+    va_start( ap, start );
+    va_copy( _ap, ap );
+    size_t length = 0;
+    for ( const char* string = (*start)->cstr; string != NULL; string = va_arg( ap, char* ) )
+    {
+        length += strlen( string );
+    }
+    va_end(ap);
+    size_t index = (*start)->length;
+    if ( str_resize( start, length ) )
+    {
+        for ( const char* string = va_arg( _ap, char* ); string != NULL; string = va_arg( _ap, char* ) )
+        {
+            strcpy( (*start)->cstr + index, string );
+            index += strlen( string );
+        }
+        va_end( _ap );
+        return *start;
     }
     va_end( _ap );
     return NULL;
