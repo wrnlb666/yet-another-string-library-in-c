@@ -1,5 +1,8 @@
 #include "str.h"
 
+#define STB_SPRINTF_IMPLEMENTATION
+#include "stb_sprintf.h"
+#define vsnprintf stbsp_vsnprintf
 
 #ifdef USE_GC
 #include <gc/gc.h>
@@ -300,7 +303,7 @@ string_t* str_append( string_t** start, const string_t* end )
     if ( str_resize( start, (*start)->length + end->length ) )
     {
         strcpy( (*start)->cstr + length, end->cstr );
-        return start;
+        return *start;
     }
     return NULL;
 }
