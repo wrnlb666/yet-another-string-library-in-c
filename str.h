@@ -104,7 +104,7 @@ void str_to_lower( string_t* string );
 string_t* str_substr( const string_t* src, size_t start, size_t size );
 
 // copy a string, return a new string
-string_t* str_strcpy( const string_t* src );
+string_t* str_strdup( const string_t* src );
 
 // insert a c string into src at index index, returning the new string
 string_t* str_inserted( const string_t* src, size_t index, const char* in );
@@ -117,7 +117,10 @@ string_t* str_replaced( const string_t* src, const char* old_val, const char* ne
 // using "a" or "ai" for multibytes string may not return the correct result
 // if used c, other modes will be ignored
 // order does matter for "l" and "a", "la" and "al" will return different result
-bool str_sort( string_t** src, size_t size, const char* mode, ... );
+string_t** str_sort( string_t** src, size_t size, const char* mode, ... );
+
+// same as above, but return a new array of strings
+string_t** str_sorted( string_t** src, size_t size, const char* mode, ... );
 
 // compare str, 0 means the same
 int str_strcmp( const string_t* str1, const string_t* str2 );

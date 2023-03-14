@@ -520,7 +520,7 @@ string_t* str_substr( const string_t* src, size_t start, size_t size )
 }
 
 
-string_t* str_strcpy( const string_t* src )
+string_t* str_strdup( const string_t* src )
 {
     string_t* new_str = NULL;
     if ( str_resize( &new_str, src->length ) )
@@ -704,7 +704,7 @@ static inline int str_cmp_lai( const void* arg1, const void* arg2 )
     return 0;
 }
 
-bool str_sort( string_t** src, size_t size, const char* mode, ... )
+string_t** str_sort( string_t** src, size_t size, const char* mode, ... )
 {
     enum modes
     {
@@ -747,7 +747,7 @@ bool str_sort( string_t** src, size_t size, const char* mode, ... )
         }
         else
         {
-            return ( fputs( "[ERRO]: invalid mode\n", stderr ), false );
+            return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
         }
     }
     if ( size == 0 )
@@ -784,10 +784,103 @@ bool str_sort( string_t** src, size_t size, const char* mode, ... )
     }
     else
     {
-        return ( fputs( "[ERRO]: invalid mode\n", stderr ), false );
+        return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
     }
     qsort( src, size, sizeof (string_t*), compar );
-    return true;
+    return src;
+}
+
+
+string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
+{
+    enum modes
+    {
+        c, i, l, a, la, modes_max
+    };
+    bool option[ modes_max ] = { 0 };
+    for ( const char *ch = mode; *ch != 0; ch++ )
+    {
+        if ( *ch == 'c' )
+        {
+            option[c] = true;
+            break;
+        }
+        else if ( *ch == 'i' )
+        {
+            option[i] = true;
+        }
+        else if ( *ch == 'l' )
+        {
+            if ( option[a] == true )
+            {
+                continue;
+            }
+            else
+            {
+                option[l] = true;
+            }
+        }
+        else if ( *ch == 'a' )
+        {
+            if ( option[l] == true )
+            {
+                option[l] = false;
+                option[la] = true;
+            }
+            else
+            {
+                option[a] = true;
+            }
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
+        }
+    }
+    if ( size == 0 )
+    {
+        for ( ; src[size]!= NULL; size++ );
+    }
+    int (*compar)(const void *, const void *);
+    if ( option[c] == true )
+    {
+        va_list ap;
+        va_start( ap, mode );
+        compar = va_arg( ap, int (*)(const void *, const void *) );
+        va_end(ap);
+    }
+    else if ( option[l] == true )
+    {
+        compar = str_cmp_l;
+    }
+    else if ( option[a] == true && option[i] == false )
+    {
+        compar = str_cmp_a;
+    }
+    else if ( option[a] == true && option[i] == true )
+    {
+        compar = str_cmp_ai;
+    }
+    else if ( option[la] == true )
+    {
+        compar = str_cmp_la;
+    }
+    else if ( option[la] == true && option[i] == true )
+    {
+        compar = str_cmp_lai;
+    }
+    else
+    {
+        return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
+    }
+    string_t** result = malloc( sizeof ( string_t* ) * size + 1 );
+    for ( int i = 0; i < size; i++ )
+    {
+        result[i] = strdup( src[i] );
+    }
+    result[size] = NULL;
+    qsort( result, size, sizeof (string_t*), compar );
+    return result;
 }
 
 
