@@ -876,7 +876,7 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
     string_t** result = malloc( sizeof ( string_t* ) * size + 1 );
     for ( int i = 0; i < size; i++ )
     {
-        result[i] = strdup( src[i] );
+        result[i] = str_strdup( src[i] );
     }
     result[size] = NULL;
     qsort( result, size, sizeof (string_t*), compar );
