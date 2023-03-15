@@ -225,9 +225,9 @@ size_t str_capacity( const string_t* string )
 }
 
 
-char* str_cstr( const string_t* string )
+const char* str_cstr( const string_t* string )
 {
-    return (char*) string->cstr;
+    return (const char*) string->cstr;
 }
 
 
@@ -522,14 +522,13 @@ string_t* str_substr( const string_t* src, size_t start, size_t size )
 
 string_t* str_strdup( const string_t* src )
 {
-    string_t* new_str = NULL;
-    if ( str_resize( &new_str, src->length ) )
+    string_t* result = malloc( sizeof ( string_t ) + sizeof ( char ) * ( src->capacity - 1 ) );
+    if ( result != NULL )
     {
-        strcpy( new_str->cstr, src->cstr );
-        new_str->cstr[ new_str->length ] = 0;
-        return new_str;
+        memcpy( result, src, sizeof ( string_t ) + sizeof ( char ) * src->length );
+        return result;
     }
-    return NULL;
+    return ( fputs( "[ERRO]: run out of memory\n", stderr ), NULL );
 }
 
 
@@ -704,6 +703,7 @@ static inline int str_cmp_lai( const void* arg1, const void* arg2 )
     return 0;
 }
 
+
 string_t** str_sort( string_t** src, size_t size, const char* mode, ... )
 {
     enum modes
@@ -873,8 +873,8 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
     {
         return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
     }
-    string_t** result = malloc( sizeof ( string_t* ) * size + 1 );
-    for ( int i = 0; i < size; i++ )
+    string_t** result = malloc( sizeof ( string_t* ) * ( size + 1 ) );
+    for ( size_t i = 0; i < size; i++ )
     {
         result[i] = str_strdup( src[i] );
     }

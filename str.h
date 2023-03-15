@@ -24,7 +24,7 @@ size_t str_strlen( const string_t* string );
 size_t str_capacity( const string_t* string );
 
 // get a c type null terminated string from string
-char* str_cstr( const string_t* string );
+const char* str_cstr( const string_t* string );
 
 // get a wchar_t string from string, user free, probably useful on windows?
 // use str_free to free the returned result
