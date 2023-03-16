@@ -551,6 +551,24 @@ string_t* str_inserted( const string_t* src, size_t index, const char* in )
 }
 
 
+string_t* str_insert( string_t** src, size_t index, const char* in )
+{
+    if ( index > (*src)->length )
+    {
+        return ( fputs( "[ERRO]: index out of bound\n", stderr ), NULL );
+    }
+    size_t size = strlen(in);
+    size_t len  = (*src)->length;
+    if ( str_resize( src, len + size ) )
+    {
+        memmove( (*src)->cstr + index + size, (*src)->cstr + index, len - index + 1 );
+        memmove( (*src)->cstr + index, in, size );
+        return *src;
+    }
+    return NULL;
+}
+
+
 string_t* str_replaced( const string_t* src, const char* old_val, const char* new_val )
 {
     // creating string arrays

@@ -66,28 +66,28 @@ string_t* str_clear_to( string_t* old, string_t* new );
 // reserve memory that can hold at least length char, length+1 if count '\0'
 bool str_reserve( string_t* string, size_t length );
 
-// append two strings together, address can be overlapped
+// append two strings together to a new string_t. return NULL when failure
 string_t* str_appended( const string_t* start, const string_t* end );
 
-// the same as above, but changes the original string
+// append two string together, return address would be the same as start. return NULL when failure
 string_t* str_append( string_t** start, const string_t* end );
 
-// append strings together, the last element has to be NULL
+// append strings together to a new string_t*, the last element has to be NULL
 string_t* str_appendeds( const string_t* start, ... );
 
-// the same as above, but changes the original string
+// append strings to start, the last element has be be NULL. 
 string_t* str_appends( string_t** start, ... );
 
-// add null terminated c type string to string_t, return a string_t*
+// add null terminated c type string to string_t, return a new string_t*
 string_t* str_appended_cstr( const string_t* start, const char* end );
 
-// the same as above, but changes the original string
+// add null terminated c type string to start, return new start. 
 string_t* str_append_cstr( string_t** start, const char* end );
 
-// add null terminated c type strings to string_t, the last element has to be NULL, return a string_t*
+// add null terminated c type strings to string_t, the last element has to be NULL, return a new string_t*
 string_t* str_appended_cstrs( const string_t* start, ... );
 
-// the same as above, but changes the original string
+// add null terminated c type strings to start, the last element has to be NULL, return new start. 
 string_t* str_append_cstrs( string_t** start, ... );
 
 // split src string upon needle string, returns an array of string_t with the last element being NULL
@@ -108,6 +108,9 @@ string_t* str_strdup( const string_t* src );
 
 // insert a c string into src at index index, returning the new string
 string_t* str_inserted( const string_t* src, size_t index, const char* in );
+
+// insert a c string into src at index index, returning the new address of src
+string_t* str_insert( string_t** src, size_t index, const char* in );
 
 // replace old with new, returning a new string_t, src is not changed
 string_t* str_replaced( const string_t* src, const char* old_val, const char* new_val );
