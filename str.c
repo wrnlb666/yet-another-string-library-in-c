@@ -945,3 +945,19 @@ bool str_has( const string_t* self, const char* str )
     }
     return false;
 }
+
+
+char str_char_at( string_t* self, size_t index, char new_val )
+{
+    if ( index >= self->length )
+    {
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), 0 );
+    }
+    if ( new_val != 0 )
+    {
+        self->cstr[index] = new_val;
+    }
+    return self->cstr[index];
+}
+
+

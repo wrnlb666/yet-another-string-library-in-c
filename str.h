@@ -137,6 +137,9 @@ bool str_end_with( const string_t* self, const char* str );
 // return if the substring presents in the string_t
 bool str_has( const string_t* self, const char* str );
 
+// if new_val is 0, return the character at index index. Otherwise change that character to new_val
+char str_char_at( string_t* self, size_t index, char new_val );
+
 
 
 #endif  // __STR_H__
