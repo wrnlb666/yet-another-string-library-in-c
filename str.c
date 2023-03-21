@@ -249,11 +249,11 @@ wchar_t* str_wstr( const string_t* string )
 }
 
 
-bool str_clear( string_t* string )
+bool str_clear( string_t** string )
 {
-    if ( str_resize( &string, 0 ) )
+    if ( str_resize( string, 0 ) )
     {
-        memset( string->cstr, 0, sizeof (char) * 16 );
+        memset( (*string)->cstr, 0, sizeof (char) * 16 );
         return true;
     }
     return false;
@@ -961,4 +961,101 @@ char str_char_at( string_t* self, size_t index, char new_val )
 }
 
 
+string_t* str_stripped( const string_t* src, const char* needle )
+{
+    size_t len = strlen( needle );
+    size_t lcount = 0;
+    size_t rcount = 0;
+    for ( size_t i = 0; i < src->length; i++ )
+    {
+        for ( size_t j = 0; j < len; j++ )
+        {
+            if ( src->cstr[i] == needle[j] )
+            {
+                lcount++;
+                goto lout;
+            }
+        }
+        break;
+        lout:
+    }
+    string_t* result = NULL;
+    if ( lcount == src->length )
+    {
+        if ( str_resize( &result, 0 ) )
+        {
+            return result;
+        }
+        return NULL;
+    }
+    for ( size_t i = src->length - 1; i > 0; i-- )
+    {
+        for ( size_t j = 0; j < len; j++ )
+        {
+            if ( src->cstr[i] == needle[j] )
+            {
+                rcount++;
+                goto rout;
+            }
+        }
+        break;
+        rout:
+    }
+    if ( str_resize( &result, ( src->length - lcount - rcount ) ) )
+    {
+        memcpy( result->cstr, src->cstr + lcount, src->length - lcount - rcount );
+        result->cstr[ result->length ] = 0;
+        return result;
+    }
+    return NULL;
+}
 
+
+string_t* str_strip( string_t** self, const char* needle )
+{
+    size_t len = strlen( needle );
+    size_t lcount = 0;
+    size_t rcount = 0;
+    for ( size_t i = 0; i < (*self)->length; i++ )
+    {
+        for ( size_t j = 0; j < len; j++ )
+        {
+            if ( (*self)->cstr[i] == needle[j] )
+            {
+                lcount++;
+                goto lout;
+            }
+        }
+        break;
+        lout:
+    }
+    if ( lcount == (*self)->length )
+    {
+        if ( str_resize( self, 0 ) )
+        {
+            (*self)->cstr[0] = 0;
+            return *self;
+        }
+        return NULL;
+    }
+    for ( size_t i = (*self)->length - 1; i > 0; i-- )
+    {
+        for ( size_t j = 0; j < len; j++ )
+        {
+            if ( (*self)->cstr[i] == needle[j] )
+            {
+                rcount++;
+                goto rout;
+            }
+        }
+        break;
+        rout:
+    }
+    memmove( (*self)->cstr, (*self)->cstr + lcount, (*self)->length - lcount - rcount );
+    if ( str_resize( self, ( (*self)->length - lcount - rcount ) ) )
+    {
+        (*self)->cstr[ (*self)->length ] = 0;
+        return *self;
+    }
+    return NULL;
+}

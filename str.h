@@ -57,7 +57,7 @@ void str_frees( string_t* string, ... );
 void str_free_arr( string_t** str_arr );
 
 // effectivly clear the string, set the length to 0, may or may not change the capacity. 
-bool str_clear( string_t* string );
+bool str_clear( string_t** string );
 
 // free the memory used by string, and at the same time return a new string.
 // e.g.: str = str_clear_to( str, str_new_format( "random string" ) );
@@ -139,6 +139,12 @@ bool str_has( const string_t* self, const char* str );
 
 // if new_val is 0, return the character at index index. Otherwise change that character to new_val
 char str_char_at( string_t* self, size_t index, char new_val );
+
+// return a new stripped string_t
+string_t* str_stripped( const string_t* src, const char* needle );
+
+// strip self, and return it
+string_t* str_strip( string_t** self, const char* needle );
 
 
 
