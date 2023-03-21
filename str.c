@@ -68,7 +68,7 @@ static inline bool str_resize( string_t** string, size_t size )
         }
         while ( cap <= 1024 )
         {
-            if ( cap * 2 < (*string)->capacity )
+            if ( cap * 2 <= (*string)->capacity )
             {
                 (*string)->capacity /= 2;
             }
@@ -1057,5 +1057,24 @@ string_t* str_strip( string_t** self, const char* needle )
         (*self)->cstr[ (*self)->length ] = 0;
         return *self;
     }
+    return NULL;
+}
+
+
+string_t* str_from_file( const char* file_name )
+{
+    FILE* fp = fopen( file_name, "r" );
+    fseek( fp, 0, SEEK_END );
+    size_t length = ftell( fp );
+    fseek( fp, 0, SEEK_SET );
+    string_t* result = NULL;
+    if ( str_resize( &result, length ) )
+    {
+        fread( result->cstr, sizeof (char), length, fp );
+        result->cstr[ result->length ] = 0;
+        fclose(fp);
+        return result;
+    }
+    fclose(fp);
     return NULL;
 }

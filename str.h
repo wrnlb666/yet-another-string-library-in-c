@@ -146,6 +146,9 @@ string_t* str_stripped( const string_t* src, const char* needle );
 // strip self, and return it
 string_t* str_strip( string_t** self, const char* needle );
 
+// read file into string. Return NULL if failed
+string_t* str_from_file( const char* file_name );
+
 
 
 #endif  // __STR_H__
