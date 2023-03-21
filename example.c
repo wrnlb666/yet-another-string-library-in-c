@@ -22,9 +22,9 @@ int main( void )
     }
     str_sort( arr, 0, "c", &compar );
     printf( "\nsorted: \n" );
-    for ( size_t i = 0; arr[i] != NULL; i++ )
+    for ( str_t* temp = arr; *temp; temp++ )
     {
-        printf( "%zu, %s\n", str_strlen( arr[i] ), str_cstr(arr[i]) );
+        printf( "%zu, %s\n", str_strlen( *temp ), str_cstr( *temp ) );
     }
     // not necessary if define USE_GC
     str_free_arr( arr );
@@ -35,7 +35,7 @@ int main( void )
     str_t str5 = str_inserted( str3, 2, "l" );
 
     printf( "\ninfo for changes:\n" );
-    printf( "%zu, %s\n", str_strlen(str), str_cstr(str) );
+    printf( "%zu, %s\n", str_strlen(str),  str_cstr(str) );
     printf( "%zu, %s\n", str_strlen(str2), str_cstr(str2) );
     printf( "%zu, %s\n", str_strlen(str3), str_cstr(str3) );
     printf( "%zu, %s\n", str_strlen(str4), str_cstr(str4) );
