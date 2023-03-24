@@ -70,7 +70,7 @@ size_t str_capacity( const string_t* string );
 ```c
 const char* str_cstr( const string_t* string );
 ```
-* This is not a getter function. It returns a `malloc` allocated `wchar_t*` or `LPWSTR`( if on windows ). This function is caller free if the library is not build with `USE_GC` preprocessor. Please use `str_free` function to free this string in case that the wide string might be allocated by `GC_malloc`. 
+* This is not a typical getter function. It returns a `malloc` allocated `wchar_t*` or `LPWSTR`( if on windows ). This function is caller free if the library is not build with `USE_GC` preprocessor. Please use `str_free` function to free this string in case that the wide string might be allocated by `GC_malloc`. 
 ```c
 wchar_t* str_wstr( const string_t* string );
 ```
@@ -87,4 +87,18 @@ void str_frees( string_t* string, ... );
 * free an array of `str_t` or `string_t*`, the last element of the array has to be `NULL`. 
 ```c
 void str_free_arr( string_t** str_arr );
+```
+
+#### Memory Manipulate Functions:
+* clear the string, set the length to 0, may or may not reallocate memory. Return `true` on success, `false` on failure. 
+```c
+bool str_clear( string_t** string );
+```
+* free the old string, and return the new string. This function is just for convenient. 
+```c
+string_t* str_clear_to( string_t* old, string_t* new );
+```
+* reserve enough memory for string that has `length` ASCII characters or `length` bytes. If `length` is smaller than the current string length, nothing would happen, and the function still return `true` as it is a valid operation. The operation is normally handled by the library. And user shouldn't need to use `str_reserve` manually. Return `true` on success, `false` on allocation failure. 
+```c
+bool str_reserve( string_t* string, size_t length );
 ```
