@@ -1064,6 +1064,15 @@ string_t* str_strip( string_t** self, const char* needle )
 string_t* str_from_file( const char* file_name )
 {
     FILE* fp = fopen( file_name, "r" );
+    if ( fp == NULL )
+    {
+        return 
+        (
+            fprintf( stderr, "[ERRO]: failed opening file: \"%s\": %s\n", file_name, strerror( errno ) ), 
+            errno = 0,
+            NULL 
+        );
+    }
     fseek( fp, 0, SEEK_END );
     size_t length = ftell( fp );
     fseek( fp, 0, SEEK_SET );
@@ -1078,3 +1087,104 @@ string_t* str_from_file( const char* file_name )
     fclose(fp);
     return NULL;
 }
+
+
+bool str_isdigit( const string_t* src )
+{
+    for ( size_t i = 0; i < src->length; i++ )
+    {
+        if ( isdigit( src->cstr[i] ) == false )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+bool str_isxdigit( const string_t* src )
+{
+    for ( size_t i = 0; i < src->length; i++ )
+    {
+        if ( isxdigit( src->cstr[i] ) == false )
+        {
+            if ( i == 1 )
+            {
+                if ( ( src->cstr[i] == 'x' || src->cstr[i] == 'X' ) && src->cstr[0] == '0' )
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+bool str_isfloat( const string_t* src )
+{
+    bool dot = false;
+    for ( size_t i = 0; i < src->length; i++ )
+    {
+        if ( isdigit( src->cstr[i] ) == false )
+        {
+            if ( src->cstr[i] == '.' )
+            {
+                if ( dot )
+                {
+                    return false;
+                }
+                dot = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+long str_strtol( const string_t* src, bool* err, int base )
+{
+    char* res = NULL;
+    errno = 0;
+    long result = strtol( src->cstr, &res, base );
+    if ( errno != 0 )
+    {
+        if ( err != NULL )
+        {
+            *err = false;
+            return 0;
+        }
+        return 0;
+    }
+    if ( *res == 0 && (size_t) ( res - src->cstr ) == src->length )
+    {
+        if ( err != NULL )
+        {
+            *err = true;
+            return result;
+        }
+        errno = EINVAL;
+        return result;
+    }
+    else
+    {
+        if ( err != NULL )
+        {
+            *err = false;
+            return 0;
+        }
+        errno = EINVAL;
+        return 0;
+    }
+}
+
+
+

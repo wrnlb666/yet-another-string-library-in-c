@@ -7,6 +7,7 @@
 #include <wchar.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <ctype.h>
 
@@ -149,6 +150,18 @@ string_t* str_strip( string_t** self, const char* needle );
 // read file into string. Return NULL if failed
 string_t* str_from_file( const char* file_name );
 
+// check if the string is a integer
+bool str_isdigit( const string_t* src );
 
+// check if the string is a hex integer
+bool str_isxdigit( const string_t* src );
+
+// check if the string is a floating point.
+bool str_isfloat( const string_t* src );
+
+// convert string_t to long int. If err is `NULL`, there will not be error handling
+// `err` is `true` if succeed, `false` if failed,
+// base is used to tell the base of src, if base 0 or base 16, src can start with '0x' or '0X'
+long str_strtol( const string_t* src, bool* err, int base );
 
 #endif  // __STR_H__
