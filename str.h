@@ -164,4 +164,9 @@ bool str_isfloat( const string_t* src );
 // base is used to tell the base of src, if base 0 or base 16, src can start with '0x' or '0X'
 long str_strtol( const string_t* src, bool* err, int base );
 
+// utf-8 version of char at, can not change character. 
+// this function returns a address of global variable buffer, user does not need to free the buffer
+// but it is user's responsibility to `strdup` this buffer for latter use. 
+char* str_uchar_at( string_t* self, size_t index );
+
 #endif  // __STR_H__

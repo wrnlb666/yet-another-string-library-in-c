@@ -1187,4 +1187,69 @@ long str_strtol( const string_t* src, bool* err, int base )
 }
 
 
+char* str_uchar_at( string_t* self, size_t index )
+{
+    static char buf[5];
+    memset( buf, 0, sizeof(buf) );
+
+    size_t current_char = 0;
+    const unsigned char* ptr = ( const unsigned char* ) self->cstr;
+
+    while ( *ptr && current_char < index )
+    {
+        if ( *ptr == 0 )
+        {
+            return buf;
+        }
+        else if ( ( *ptr & 0x80 ) == 0 )
+        {
+            ptr++;
+        }
+        else if ( ( *ptr & 0xE0 ) == 0xC0 )
+        {
+            ptr += 2;
+        }
+        else if ( ( *ptr & 0xF0 ) == 0xE0 )
+        {
+            ptr += 3;
+        }
+        else if ( ( *ptr & 0xF8 ) == 0xF0 )
+        {
+            ptr += 4;
+        }
+        else
+        {
+            return buf;
+        }
+        current_char++;
+    }
+    if ( *ptr == 0 )
+    {
+        return buf;
+    }
+    else if ( ( *ptr & 0x80 ) == 0 )
+    {
+        memcpy( buf, ptr, 1 );
+        return buf;
+    }
+    else if ( ( *ptr & 0xE0 ) == 0xC0 )
+    {
+        memcpy( buf, ptr, 2 );
+        return buf;
+    }
+    else if ( ( *ptr & 0xF0 ) == 0xE0 )
+    {
+        memcpy( buf, ptr, 3 );
+        return buf;
+    }
+    else if ( ( *ptr & 0xF8 ) == 0xF0 )
+    {
+        memcpy( buf, ptr, 4 );
+        return buf;
+    }
+    return buf;
+}
+
+
+
 
