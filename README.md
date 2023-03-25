@@ -57,6 +57,20 @@ string_t* str_new_string_narr( const char** src, size_t size );
 string_t* str_from_file( const char* file_name );
 ```
 
+#### Destructor:
+* free a single `str_t` or `string_t*`. 
+```c
+void str_free( void* string );
+```
+* free a list of `str_t` or `string_t*`, the last element has to be `NULL`. 
+```c
+void str_frees( string_t* string, ... );
+```
+* free an array of `str_t` or `string_t*`, the last element of the array has to be `NULL`. 
+```c
+void str_free_arr( string_t** str_arr );
+```
+
 #### Getter:
 * get the length of the string. 
 ```c
@@ -74,20 +88,17 @@ const char* str_cstr( const string_t* string );
 ```c
 wchar_t* str_wstr( const string_t* string );
 ```
+* This is both a setter and a getter, to use it as a getter, use `0` as the value for `new_val`. On success, this function will return the the character at the asked index. On failure, this function will return 0 or `\0`. 
+```c
+char str_char_at( string_t* self, size_t index, char new_val );
+```
 
-#### Destructor:
-* free a single `str_t` or `string_t*`. 
+#### Setter:
+* This is both a setter and a getter, to use it as a setter, give an ascii character to `new_val`. On success, this function will return the new character at the changed index. On failure, this funtion will return 0 or `\0`. 
 ```c
-void str_free( void* string );
+char str_char_at( string_t* self, size_t index, char new_val );
 ```
-* free a list of `str_t` or `string_t*`, the last element has to be `NULL`. 
-```c
-void str_frees( string_t* string, ... );
-```
-* free an array of `str_t` or `string_t*`, the last element of the array has to be `NULL`. 
-```c
-void str_free_arr( string_t** str_arr );
-```
+
 
 #### Memory Manipulate Functions:
 * clear the string, set the length to 0, may or may not reallocate memory. Return `true` on success, `false` on failure. 
@@ -102,3 +113,5 @@ string_t* str_clear_to( string_t* old, string_t* new );
 ```c
 bool str_reserve( string_t* string, size_t length );
 ```
+
+#### 
