@@ -1,5 +1,6 @@
 #include "str.h"
 
+
 #define STB_SPRINTF_IMPLEMENTATION
 #include "stb_sprintf.h"
 #define vsnprintf stbsp_vsnprintf
@@ -88,7 +89,8 @@ string_t* str_new_string( const char* src )
     string_t* string = NULL;
     if ( str_resize( &string, strlen(src) ) )
     {
-        strcpy( string->cstr, src );
+        memmove( string->cstr, src, string->length );
+        string->cstr[ string->length ] = 0;
         return string;
     }
     return NULL;
@@ -772,12 +774,14 @@ string_t** str_sort( string_t** src, size_t size, const char* mode, ... )
     {
         for ( ; src[size]!= NULL; size++ );
     }
-    int (*compar)(const void *, const void *);
+    void* temp;
+    int ( *compar )( const void *, const void * );
     if ( option[c] == true )
     {
         va_list ap;
         va_start( ap, mode );
-        compar = va_arg( ap, int (*)(const void *, const void *) );
+        temp = va_arg( ap, void* );
+        compar = ( int (*)( const void*, const void* ) ) temp;
         va_end(ap);
     }
     else if ( option[l] == true )
@@ -859,12 +863,14 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
     {
         for ( ; src[size]!= NULL; size++ );
     }
-    int (*compar)(const void *, const void *);
+    void* temp;
+    int ( *compar )( const void *, const void * );
     if ( option[c] == true )
     {
         va_list ap;
         va_start( ap, mode );
-        compar = va_arg( ap, int (*)(const void *, const void *) );
+        temp = va_arg( ap, void* );
+        compar = ( int (*)( const void*, const void* ) ) temp;
         va_end(ap);
     }
     else if ( option[l] == true )
