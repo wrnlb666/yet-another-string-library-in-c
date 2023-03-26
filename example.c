@@ -1,5 +1,7 @@
 #include "str.h"
 
+#define p_bool( statement ) statement ? "true" : "false"
+
 // compare function for str_sort, from longest to shortest
 int compar( const void* arg1, const void* arg2 )
 {
@@ -40,7 +42,7 @@ int main( void )
     printf( "%zu, %s\n", str_strlen(str3), str_cstr(str3) );
     printf( "%zu, %s\n", str_strlen(str4), str_cstr(str4) );
     printf( "%zu, %s\n", str_strlen(str5), str_cstr(str5) );
-    printf( "%d, %d\n", str_start_with( str5, "lol" ), str_end_with( str5, " World" ) );
+    printf( "%s, %s\n", p_bool( str_start_with( str5, "lol" ) ), p_bool( str_end_with( str5, " World" ) ) );
 
     wchar_t* wstr = str_wstr( str );
     wprintf( L"%ls", wstr );
