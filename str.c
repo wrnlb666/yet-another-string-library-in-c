@@ -1283,23 +1283,17 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
         size_t index = 0;
         if ( step > 0 )
         {
-            for ( size_t i = 0; i < sub_len; i++ )
+            for ( size_t i = 0; i < sub_len; i += step )
             {
-                if ( i % step == 0 )
-                {
-                    result->cstr[ index++ ] = ptr[i];
-                }
+                result->cstr[ index++ ] = ptr[i];
             }
         }
         else
         {
             // i <= sub_len for unsigned integer overflow
-            for ( size_t i = sub_len - 1; i <= sub_len; i-- )
+            for ( size_t i = sub_len - 1; i <= sub_len; i += step )
             {
-                if ( i % step == 0 )
-                {
-                    result->cstr[ index++ ] = ptr[i];
-                }
+                result->cstr[ index++ ] = ptr[i];
             }
         }
         result->cstr[ result->length ] = 0;
@@ -1333,28 +1327,23 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
     size_t index = 0;
     if ( step > 0 )
     {
-        for ( size_t i = 0; i < sub_len; i++ )
+        for ( size_t i = 0; i < sub_len; i += step )
         {
-            if ( i % step == 0 )
-            {
-                result[ index++ ] = ptr[i];
-            }
+            result[ index++ ] = ptr[i];
         }
     }
     else
     {
         // i <= sub_len for unsigned integer overflow
-        for ( size_t i = sub_len - 1; i <= sub_len; i-- )
+        for ( size_t i = sub_len - 1; i <= sub_len; i += step )
         {
-            if ( i % step == 0 )
-            {
-                result[ index++ ] = ptr[i];
-            }
+            result[ index++ ] = ptr[i];
         }
     }
     if ( str_resize( self, length ) )
     {
         memcpy( (*self)->cstr, result, length );
+        (*self)->cstr[ (*self)->length ] = 0;
         #ifdef __STDC_NO_VLA__
         free( result );
         #endif
