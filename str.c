@@ -977,7 +977,8 @@ string_t* str_stripped( const string_t* src, const char* needle )
             }
         }
         break;
-        lout:
+    lout:
+        continue;    
     }
     string_t* result = NULL;
     if ( lcount == src->length )
@@ -999,7 +1000,8 @@ string_t* str_stripped( const string_t* src, const char* needle )
             }
         }
         break;
-        rout:
+    rout:
+        continue;
     }
     if ( str_resize( &result, ( src->length - lcount - rcount ) ) )
     {
@@ -1027,7 +1029,8 @@ string_t* str_strip( string_t** self, const char* needle )
             }
         }
         break;
-        lout:
+    lout:
+        continue;
     }
     if ( lcount == (*self)->length )
     {
@@ -1049,7 +1052,8 @@ string_t* str_strip( string_t** self, const char* needle )
             }
         }
         break;
-        rout:
+    rout:
+        continue;
     }
     memmove( (*self)->cstr, (*self)->cstr + lcount, (*self)->length - lcount - rcount );
     if ( str_resize( self, ( (*self)->length - lcount - rcount ) ) )
@@ -1249,6 +1253,119 @@ char* str_uchar_at( string_t* self, size_t index )
     }
     return buf;
 }
+
+
+int str_print( string_t* self, FILE* fp, const char* end )
+{
+    return fprintf( fp, "%s%s", self->cstr, end );
+}
+
+
+string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t step )
+{
+    if ( step == 0 )
+    {
+        return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+    }
+    size_t start_index  = start >= 0 ? (size_t) start : src->length + start;
+    size_t end_index    = end > 0 ? (size_t) end : src->length + end;
+    if ( start_index > end_index || end_index > src->length )
+    {
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+    }
+    size_t sub_len = end_index - start_index;
+    const char* ptr = src->cstr + start_index;
+    size_t abs_step = llabs(step);
+    size_t length = sub_len % abs_step == 0 ? sub_len / abs_step : sub_len / abs_step + 1;
+    string_t* result = NULL;
+    if ( str_resize( &result, length ) )
+    {
+        size_t index = 0;
+        if ( step > 0 )
+        {
+            for ( size_t i = 0; i < sub_len; i++ )
+            {
+                if ( i % step == 0 )
+                {
+                    result->cstr[ index++ ] = ptr[i];
+                }
+            }
+        }
+        else
+        {
+            // i <= sub_len for unsigned integer overflow
+            for ( size_t i = sub_len - 1; i <= sub_len; i-- )
+            {
+                if ( i % step == 0 )
+                {
+                    result->cstr[ index++ ] = ptr[i];
+                }
+            }
+        }
+        result->cstr[ result->length ] = 0;
+        return result;
+    }
+    return NULL;
+}
+
+
+string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
+{
+    if ( step == 0 )
+    {
+        return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+    }
+    size_t start_index  = start >= 0 ? (size_t) start : (*self)->length + start;
+    size_t end_index    = end > 0 ? (size_t) end : (*self)->length + end;
+    if ( start_index > end_index || end_index > (*self)->length )
+    {
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+    }
+    size_t sub_len = end_index - start_index;
+    const char* ptr = (*self)->cstr + start_index;
+    size_t abs_step = llabs(step);
+    size_t length = sub_len % abs_step == 0 ? sub_len / abs_step : sub_len / abs_step + 1;
+    #if defined( __STDC_NO_VLA__ )
+    char* result = malloc( length );
+    #else
+    char result[ length ];
+    #endif
+    size_t index = 0;
+    if ( step > 0 )
+    {
+        for ( size_t i = 0; i < sub_len; i++ )
+        {
+            if ( i % step == 0 )
+            {
+                result[ index++ ] = ptr[i];
+            }
+        }
+    }
+    else
+    {
+        // i <= sub_len for unsigned integer overflow
+        for ( size_t i = sub_len - 1; i <= sub_len; i-- )
+        {
+            if ( i % step == 0 )
+            {
+                result[ index++ ] = ptr[i];
+            }
+        }
+    }
+    if ( str_resize( self, length ) )
+    {
+        memcpy( (*self)->cstr, result, length );
+        #ifdef __STDC_NO_VLA__
+        free( result );
+        #endif
+        return *self;
+    }
+    #ifdef __STDC_NO_VLA__
+    free( result );
+    #endif
+    return NULL;
+}
+
 
 
 

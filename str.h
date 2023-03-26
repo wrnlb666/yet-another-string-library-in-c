@@ -169,4 +169,13 @@ long str_strtol( const string_t* src, bool* err, int base );
 // but it is user's responsibility to `strdup` this buffer for latter use. 
 char* str_uchar_at( string_t* self, size_t index );
 
+// print the string to specified output stream
+int str_print( string_t* self, FILE* fp, const char* end );
+
+// slice string, return a new string, step cannot be zero
+string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t step );
+
+// slice, change original string
+string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step );
+
 #endif  // __STR_H__
