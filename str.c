@@ -774,14 +774,20 @@ string_t** str_sort( string_t** src, size_t size, const char* mode, ... )
     {
         for ( ; src[size]!= NULL; size++ );
     }
+    #ifdef _MSC_VER
     void* temp;
+    #endif
     int ( *compar )( const void *, const void * );
     if ( option[c] == true )
     {
         va_list ap;
         va_start( ap, mode );
+        #ifdef _MSC_VER
         temp = va_arg( ap, void* );
         compar = ( int (*)( const void*, const void* ) ) temp;
+        #else
+        compar = va_arg( ap, int (*)( const void*, const void* ) );
+        #endif
         va_end(ap);
     }
     else if ( option[l] == true )
@@ -863,14 +869,20 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
     {
         for ( ; src[size]!= NULL; size++ );
     }
+    #ifdef _MSC_VER
     void* temp;
+    #endif
     int ( *compar )( const void *, const void * );
     if ( option[c] == true )
     {
         va_list ap;
         va_start( ap, mode );
+        #ifdef _MSC_VER
         temp = va_arg( ap, void* );
         compar = ( int (*)( const void*, const void* ) ) temp;
+        #else
+        compar = va_arg( ap, int (*)( const void*, const void* ) );
+        #endif
         va_end(ap);
     }
     else if ( option[l] == true )
