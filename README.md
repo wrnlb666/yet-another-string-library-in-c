@@ -1,7 +1,7 @@
 # string
-A string library that only depends on libc, with optional bdw-gc support to have a gc manage memory for you
+A string library that only depends on libc, with optional bdw-gc support to have a gc manage memory for you. 
 
-define `USE_GC` when compiling `str.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid calling any `str_destroy` functions. 
+define `USE_GC` when compiling `str.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid need of calling any `str_free` functions. 
 
 ### Struct:
 ***
@@ -92,11 +92,19 @@ wchar_t* str_wstr( const string_t* string );
 ```c
 char str_char_at( string_t* self, size_t index, char new_val );
 ```
+*  Get the utf-8 character at specified index. The returned value is a utf-8 encoded string that contains only one utf-8 character. User must not free the returned value, since the buffer is managed by the library. But user should copy the character if it is needed for later use. On success, this function returns the utf-8 character as a c type string, on failure, this function returns a string with 0 length. 
+```c
+char* str_uchar_at( string_t* self, size_t index );
+```
 
-#### Setter:
+#### Content Manipulate Functions:
 * This is both a setter and a getter, to use it as a setter, give an ascii character to `new_val`. On success, this function will return the new character at the changed index. On failure, this funtion will return 0 or `\0`. 
 ```c
 char str_char_at( string_t* self, size_t index, char new_val );
+```
+* This function append the `end` string to the end of `start` string and return a new string. both `end` and `start` is not changed. 
+```c
+string_t* str_appended( const string_t* start, const string_t* end );
 ```
 
 
