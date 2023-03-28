@@ -25,6 +25,7 @@ All function has prefix `str_`, and for different argument type, the postfix sho
 * `str_funcs()` will take variadic `NULL` terminated arguments. 
 * `str_funced()` means the function will return a newly allocated string. 
 * `str_func()` will have two meaning, one being takes only one argument, the other one being that it make changes on the original string. 
+* `str_utf8_func()` will treat the string as a utf-8 encoded string. But since utf-8 characters are variadic length, it is much slower than normal functions. 
 
 Since `malloc`, `realloc` may fail when there's not enough memory, any call from this library may fail for the exact same reason. For any unsuccessful call, the library will return a `NULL` pointer as an result. 
 
@@ -94,7 +95,7 @@ char str_char_at( string_t* self, size_t index, char new_val );
 ```
 *  Get the utf-8 character at specified index. The returned value is a utf-8 encoded string that contains only one utf-8 character. User must not free the returned value, since the buffer is managed by the library. But user should copy the character if it is needed for later use. On success, this function returns the utf-8 character as a c type string, on failure, this function returns a string with 0 length. 
 ```c
-char* str_uchar_at( string_t* self, size_t index );
+char* str_utf8_char_at( string_t* self, size_t index );
 ```
 
 #### Content Manipulate Functions:

@@ -167,7 +167,7 @@ long str_strtol( const string_t* src, bool* err, int base );
 // utf-8 version of char at, can not change character. 
 // this function returns a address of global variable buffer, user does not need to free the buffer
 // but it is user's responsibility to `strdup` this buffer for latter use. 
-char* str_uchar_at( string_t* self, size_t index );
+char* str_utf8_char_at( string_t* self, size_t index );
 
 // print the string to specified output stream
 int str_print( string_t* self, FILE* fp, const char* end );

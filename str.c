@@ -1209,7 +1209,7 @@ long str_strtol( const string_t* src, bool* err, int base )
 }
 
 
-char* str_uchar_at( string_t* self, size_t index )
+char* str_utf8_char_at( string_t* self, size_t index )
 {
     static char buf[5];
     memset( buf, 0, sizeof(buf) );
