@@ -55,7 +55,7 @@ static inline bool str_resize( string_t** string, size_t size )
         }
         if ( (*string)->capacity == capacity ) return true;
         (*string) = realloc( (*string), sizeof ( string_t ) + sizeof ( char ) * ( (*string)->capacity - 1 ) );
-        if ( (*string) == NULL ) return ( fputs( "[ERRO]: run out of memory\n", stderr ), false );
+        if ( (*string) == NULL ) return ( fputs( "[ERRO]: out of memory\n", stderr ), false );
     }
     else
     {
@@ -77,7 +77,7 @@ static inline bool str_resize( string_t** string, size_t size )
         }
         if ( (*string)->capacity == capacity ) return true;
         *string = realloc( *string, sizeof ( string_t ) + sizeof ( char ) * ( (*string)->capacity - 1 ) );
-        if ( (*string) == NULL ) return ( fputs( "[ERRO]: run out of memory\n", stderr ), false );
+        if ( (*string) == NULL ) return ( fputs( "[ERRO]: out of memory\n", stderr ), false );
     }
     (*string)->cstr[ (*string)->length ] = 0;
     return true;
@@ -517,6 +517,90 @@ string_t* str_substr( const string_t* src, size_t start, size_t size )
         strncpy( substr->cstr, src->cstr + start, size );
         substr->cstr[ substr->length ] = 0;
         return substr;
+    }
+    return NULL;
+}
+
+
+string_t* str_utf8_substr( const string_t* src, size_t start, size_t size )
+{
+    if ( start + size > src->length )
+    {
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+    }
+    size_t current_char = 0;
+    const unsigned char* ptr = ( const unsigned char* ) src->cstr;
+    while ( current_char < start )
+    {
+        if ( *ptr == 0 )
+        {
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        }
+        else if ( ( *ptr & 0x80 ) == 0 )
+        {
+            ptr++;
+        }
+        else if ( ( *ptr & 0xE0 ) == 0xC0 )
+        {
+            ptr += 2;
+        }
+        else if ( ( *ptr & 0xF0 ) == 0xE0 )
+        {
+            ptr += 3;
+        }
+        else if ( ( *ptr & 0xF8 ) == 0xF0 )
+        {
+            ptr += 4;
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+        }
+        current_char++;
+    }
+    current_char = 0;
+
+    const unsigned char* str = ptr;
+    size_t total_size = 0;
+    while ( current_char < size )
+    {
+        if ( *str == 0 )
+        {
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        }
+        else if ( ( *str & 0x80 ) == 0 )
+        {
+            str++;
+            total_size++;
+        }
+        else if ( ( *str & 0xE0 ) == 0xC0 )
+        {
+            str += 2;
+            total_size += 2;
+        }
+        else if ( ( *str & 0xF0 ) == 0xE0 )
+        {
+            str += 3;
+            total_size += 3;
+        }
+        else if ( ( *str & 0xF8 ) == 0xF0 )
+        {
+            str += 4;
+            total_size += 4;
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+        }
+        current_char++;
+    }
+
+    // create string
+    string_t* result = NULL;
+    if ( str_resize( &result, total_size ) )
+    {
+        memcpy( result->cstr, ptr, total_size );
+        return result;
     }
     return NULL;
 }
@@ -1209,6 +1293,43 @@ long str_strtol( const string_t* src, bool* err, int base )
 }
 
 
+double str_strtod( const string_t* src, bool* err )
+{
+    char* res = NULL;
+    errno = 0;
+    double result = strtod( src->cstr, &res );
+    if ( errno != 0 )
+    {
+        if ( err != NULL )
+        {
+            *err = false;
+            return 0;
+        }
+        return 0;
+    }
+    if ( *res == 0 && (size_t) ( res - src->cstr ) == src->length )
+    {
+        if ( err != NULL )
+        {
+            *err = true;
+            return result;
+        }
+        errno = EINVAL;
+        return result;
+    }
+    else
+    {
+        if ( err != NULL )
+        {
+            *err = false;
+            return 0;
+        }
+        errno = EINVAL;
+        return 0;
+    }
+}
+
+
 char* str_utf8_char_at( string_t* self, size_t index )
 {
     static char buf[5];
@@ -1217,11 +1338,11 @@ char* str_utf8_char_at( string_t* self, size_t index )
     size_t current_char = 0;
     const unsigned char* ptr = ( const unsigned char* ) self->cstr;
 
-    while ( *ptr && current_char < index )
+    while ( current_char < index )
     {
         if ( *ptr == 0 )
         {
-            return buf;
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), buf );
         }
         else if ( ( *ptr & 0x80 ) == 0 )
         {
@@ -1241,13 +1362,13 @@ char* str_utf8_char_at( string_t* self, size_t index )
         }
         else
         {
-            return buf;
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), buf );
         }
         current_char++;
     }
     if ( *ptr == 0 )
     {
-        return buf;
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), buf );
     }
     else if ( ( *ptr & 0x80 ) == 0 )
     {
@@ -1269,7 +1390,7 @@ char* str_utf8_char_at( string_t* self, size_t index )
         memcpy( buf, ptr, 4 );
         return buf;
     }
-    return buf;
+    return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), buf );
 }
 
 
@@ -1374,6 +1495,408 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
 }
 
 
+string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int64_t step )
+{
+    if ( step == 0 )
+    {
+        return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+    }
+    size_t start_index  = start >= 0 ? (size_t) start : src->length + start;
+    size_t end_index    = end > 0 ? (size_t) end : src->length + end;
+    if ( start_index > end_index || end_index > src->length )
+    {
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+    }
+    size_t sub_len = end_index - start_index;
+    size_t abs_step = llabs(step);
 
 
+    // get to the starting index. 
+    size_t current_char = 0;
+    const unsigned char* ptr = ( const unsigned char* ) src->cstr;
+    while ( current_char < start_index )
+    {
+        if ( *ptr == 0 )
+        {
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        }
+        else if ( ( *ptr & 0x80 ) == 0 )
+        {
+            ptr++;
+        }
+        else if ( ( *ptr & 0xE0 ) == 0xC0 )
+        {
+            ptr += 2;
+        }
+        else if ( ( *ptr & 0xF0 ) == 0xE0 )
+        {
+            ptr += 3;
+        }
+        else if ( ( *ptr & 0xF8 ) == 0xF0 )
+        {
+            ptr += 4;
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+        }
+        current_char++;
+    }
+
+    // get result length and utf-8 related information
+    current_char = 0;
+    const unsigned char* str = ptr;
+    size_t total_size = 0;
+    #if defined( __STDC_NO_VLA__ )
+    uint8_t* info = malloc( sizeof ( uint8_t ) * sub_len );
+    #else
+    uint8_t info[ sub_len ];
+    #endif
+
+    while ( current_char < sub_len )
+    {
+        if ( *str == 0 )
+        {
+            #if defined( __STDC_NO_VLA__ )
+            free(info);
+            #endif
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        }
+        else if ( ( *str & 0x80 ) == 0 )
+        {
+            str++;
+            info[ current_char ] = 1;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 1;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 1;
+                }
+            }
+        }
+        else if ( ( *str & 0xE0 ) == 0xC0 )
+        {
+            str += 2;
+            info[ current_char ] = 2;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 2;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 2;
+                }
+            }
+        }
+        else if ( ( *str & 0xF0 ) == 0xE0 )
+        {
+            str += 3;
+            info[ current_char ] = 3;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 3;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 3;
+                }
+            }
+        }
+        else if ( ( *str & 0xF8 ) == 0xF0 )
+        {
+            str += 4;
+            info[ current_char ] = 4;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 4;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 4;
+                }
+            }
+        }
+        else
+        {
+            #if defined( __STDC_NO_VLA__ )
+            free(info);
+            #endif
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+        }
+        current_char++;
+    }
+
+    string_t* result = NULL;
+    if ( str_resize( &result, total_size ) )
+    {
+        size_t index = 0;
+        size_t curr = 0;
+        if ( step > 0 )
+        {
+            for ( size_t i = 0; i < sub_len; )
+            {
+                memcpy( &result->cstr[ index ], &ptr[ curr ], info[i] );
+                index += info[i];
+                for ( size_t j = 0; j < abs_step; j++ )
+                {
+                    curr += info[i];
+                    i++;
+                }
+            }
+        }
+        else
+        {
+            curr = str - ptr - info[ sub_len - 1 ];
+            // i <= sub_len for unsigned integer overflow
+            for ( size_t i = sub_len - 1; i <= sub_len; )
+            {
+                memcpy( &result->cstr[ index ], &ptr[ curr ], info[i] );
+                index += info[i];
+                for ( size_t j = 0; j < abs_step; j++ )
+                {
+                    curr -= info[i];
+                    i--;
+                }
+            }
+        }
+        result->cstr[ result->length ] = 0;
+        #if defined( __STDC_NO_VLA__ )
+        free(info);
+        #endif
+        return result;
+    }
+    #if defined( __STDC_NO_VLA__ )
+    free(info);
+    #endif
+    return NULL;
+}
+
+
+string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t step )
+{
+    if ( step == 0 )
+    {
+        return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+    }
+    size_t start_index  = start >= 0 ? (size_t) start : (*self)->length + start;
+    size_t end_index    = end > 0 ? (size_t) end : (*self)->length + end;
+    if ( start_index > end_index || end_index > (*self)->length )
+    {
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+    }
+    size_t sub_len = end_index - start_index;
+    size_t abs_step = llabs(step);
+
+
+    // get to the starting index. 
+    size_t current_char = 0;
+    const unsigned char* ptr = ( const unsigned char* ) (*self)->cstr;
+    while ( current_char < start_index )
+    {
+        if ( *ptr == 0 )
+        {
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        }
+        else if ( ( *ptr & 0x80 ) == 0 )
+        {
+            ptr++;
+        }
+        else if ( ( *ptr & 0xE0 ) == 0xC0 )
+        {
+            ptr += 2;
+        }
+        else if ( ( *ptr & 0xF0 ) == 0xE0 )
+        {
+            ptr += 3;
+        }
+        else if ( ( *ptr & 0xF8 ) == 0xF0 )
+        {
+            ptr += 4;
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+        }
+        current_char++;
+    }
+
+    // get result length and utf-8 related information
+    current_char = 0;
+    const unsigned char* str = ptr;
+    size_t total_size = 0;
+    #if defined( __STDC_NO_VLA__ )
+    uint8_t* info = malloc( sizeof ( uint8_t ) * sub_len );
+    #else
+    uint8_t info[ sub_len ];
+    #endif
+
+    while ( current_char < sub_len )
+    {
+        if ( *str == 0 )
+        {
+            #if defined( __STDC_NO_VLA__ )
+            free(info);
+            #endif
+            return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        }
+        else if ( ( *str & 0x80 ) == 0 )
+        {
+            str++;
+            info[ current_char ] = 1;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 1;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 1;
+                }
+            }
+        }
+        else if ( ( *str & 0xE0 ) == 0xC0 )
+        {
+            str += 2;
+            info[ current_char ] = 2;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 2;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 2;
+                }
+            }
+        }
+        else if ( ( *str & 0xF0 ) == 0xE0 )
+        {
+            str += 3;
+            info[ current_char ] = 3;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 3;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 3;
+                }
+            }
+        }
+        else if ( ( *str & 0xF8 ) == 0xF0 )
+        {
+            str += 4;
+            info[ current_char ] = 4;
+            if ( step > 0 )
+            {
+                if ( current_char % abs_step == 0 )
+                {
+                    total_size += 4;
+                }
+            }
+            else
+            {
+                if ( ( sub_len - current_char - 1 ) % abs_step == 0 )
+                {
+                    total_size += 4;
+                }
+            }
+        }
+        else
+        {
+            #if defined( __STDC_NO_VLA__ )
+            free(info);
+            #endif
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+        }
+        current_char++;
+    }
+
+    #if defined( __STDC_NO_VLA__ )
+    char* result = malloc( sizeof (char) * total_size );
+    #else
+    char result[total_size];
+    #endif
+
+    size_t index = 0;
+    size_t curr = 0;
+    if ( step > 0 )
+    {
+        for ( size_t i = 0; i < sub_len; )
+        {
+            memcpy( &result[ index ], &ptr[ curr ], info[i] );
+            index += info[i];
+            for ( size_t j = 0; j < abs_step; j++ )
+            {
+                curr += info[i];
+                i++;
+            }
+        }
+    }
+    else
+    {
+        curr = str - ptr - info[ sub_len - 1 ];
+        // i <= sub_len for unsigned integer overflow
+        for ( size_t i = sub_len - 1; i <= sub_len; )
+        {
+            memcpy( &result[ index ], &ptr[ curr ], info[i] );
+            index += info[i];
+            for ( size_t j = 0; j < abs_step; j++ )
+            {
+                curr -= info[i];
+                i--;
+            }
+        }
+    }
+
+    if ( str_resize( self, total_size ) )
+    {
+        memcpy( (*self)->cstr, result, total_size );
+        #if defined( __STDC_NO_VLA__ )
+        free(result);
+        free(info);
+        #endif
+        return (*self);
+    }
+    #if defined( __STDC_NO_VLA__ )
+    free(result);
+    free(info);
+    #endif
+    return NULL;
+}
 

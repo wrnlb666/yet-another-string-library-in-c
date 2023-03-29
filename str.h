@@ -104,6 +104,9 @@ void str_to_lower( string_t* string );
 // return a substr starting from index start, with size size
 string_t* str_substr( const string_t* src, size_t start, size_t size );
 
+// create a substr that treat every character as an utf-8 encoding character
+string_t* str_utf8_substr( const string_t* src, size_t start, size_t size );
+
 // copy a string, return a new string
 string_t* str_strdup( const string_t* src );
 
@@ -177,5 +180,13 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
 
 // slice, change original string
 string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step );
+
+// slice utf-8 string, return a new string, step cannot be zero
+string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int64_t step );
+
+// slice, change the original string, take input as an utf-8 encoded string
+string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t step );
+
+
 
 #endif  // __STR_H__
