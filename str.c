@@ -221,6 +221,42 @@ size_t str_strlen( const string_t* string )
 }
 
 
+size_t str_utf8_strlen( const string_t* string )
+{
+    size_t current_char = 0;
+    const unsigned char* ptr = ( const unsigned char* ) string->cstr;
+
+    while ( 1 )
+    {
+        if ( *ptr == 0 )
+        {
+            return current_char;
+        }
+        else if ( ( *ptr & 0x80 ) == 0 )
+        {
+            ptr++;
+        }
+        else if ( ( *ptr & 0xE0 ) == 0xC0 )
+        {
+            ptr += 2;
+        }
+        else if ( ( *ptr & 0xF0 ) == 0xE0 )
+        {
+            ptr += 3;
+        }
+        else if ( ( *ptr & 0xF8 ) == 0xF0 )
+        {
+            ptr += 4;
+        }
+        else
+        {
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), 0 );
+        }
+        current_char++;
+    }
+}
+
+
 size_t str_capacity( const string_t* string )
 {
     return (size_t) string->capacity;
@@ -1501,8 +1537,9 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
     {
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
     }
-    size_t start_index  = start >= 0 ? (size_t) start : src->length + start;
-    size_t end_index    = end > 0 ? (size_t) end : src->length + end;
+    size_t str_length   = str_utf8_strlen( *self );
+    size_t start_index  = start >= 0 ? (size_t) start : str_length + start;
+    size_t end_index    = end > 0 ? (size_t) end : str_length + end;
     if ( start_index > end_index || end_index > src->length )
     {
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1700,15 +1737,15 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     {
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
     }
-    size_t start_index  = start >= 0 ? (size_t) start : (*self)->length + start;
-    size_t end_index    = end > 0 ? (size_t) end : (*self)->length + end;
-    if ( start_index > end_index || end_index > (*self)->length )
+    size_t str_length   = str_utf8_strlen( *self );
+    size_t start_index  = start >= 0 ? (size_t) start : str_length + start;
+    size_t end_index    = end > 0 ? (size_t) end : str_length + end;
+    if ( start_index > end_index || end_index > str_length )
     {
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
     }
     size_t sub_len = end_index - start_index;
     size_t abs_step = llabs(step);
-
 
     // get to the starting index. 
     size_t current_char = 0;

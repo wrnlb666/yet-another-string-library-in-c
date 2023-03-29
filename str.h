@@ -21,6 +21,9 @@ typedef struct string_t string_t, *str_t;
 // get the length of the string, null terminater is not included
 size_t str_strlen( const string_t* string );
 
+// get the length of the string as an utf-8 encoded string. 
+size_t str_utf8_strlen( const string_t* string );
+
 // get the capacity of how many bytes the current container can hold
 size_t str_capacity( const string_t* string );
 
