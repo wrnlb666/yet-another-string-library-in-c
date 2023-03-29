@@ -1,4 +1,4 @@
-#include "str.h"
+#include "yasli.h"
 
 
 #define STB_SPRINTF_IMPLEMENTATION
@@ -224,9 +224,10 @@ size_t str_strlen( const string_t* string )
 size_t str_utf8_strlen( const string_t* string )
 {
     size_t current_char = 0;
+    size_t length = 0;
     const unsigned char* ptr = ( const unsigned char* ) string->cstr;
 
-    while ( 1 )
+    while ( length <= string->length )
     {
         if ( *ptr == 0 )
         {
@@ -235,18 +236,22 @@ size_t str_utf8_strlen( const string_t* string )
         else if ( ( *ptr & 0x80 ) == 0 )
         {
             ptr++;
+            length++;
         }
         else if ( ( *ptr & 0xE0 ) == 0xC0 )
         {
             ptr += 2;
+            length += 2;
         }
         else if ( ( *ptr & 0xF0 ) == 0xE0 )
         {
             ptr += 3;
+            length += 3;
         }
         else if ( ( *ptr & 0xF8 ) == 0xF0 )
         {
             ptr += 4;
+            length += 4;
         }
         else
         {
@@ -254,6 +259,7 @@ size_t str_utf8_strlen( const string_t* string )
         }
         current_char++;
     }
+    return current_char;
 }
 
 
@@ -1446,13 +1452,13 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
     size_t end_index;
     if ( step > 0 )
     {
-        start_index  = start >= 0 ? (size_t) start : src->length + start;
-        end_index    = end > 0 ? (size_t) end : src->length + end;
+        start_index  = start == YASLI_START ? 0 : start == YASLI_END ? src->length : start >= 0 ? (size_t) start : src->length + start;
+        end_index    = end == YASLI_START ? 0 : end == YASLI_END ? src->length : end > 0 ? (size_t) end : src->length + end;
     }
     else
     {
-        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : src->length + end + 1;
-        end_index    = start == 0 ? src->length : start > 0 ? (size_t) start + 1 : src->length + start + 1;
+        start_index  = end == YASLI_START ? 0 : end == YASLI_END ? src->length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : src->length + end + 1;
+        end_index    = start == YASLI_START ? 0 : start == YASLI_END ? src->length : start == 0 ? src->length : start > 0 ? (size_t) start + 1 : src->length + start + 1;
     }
     if ( start_index > end_index || end_index > src->length )
     {
@@ -1498,13 +1504,13 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
     size_t end_index;
     if ( step > 0 )
     {
-        start_index  = start >= 0 ? (size_t) start : (*self)->length + start;
-        end_index    = end > 0 ? (size_t) end : (*self)->length + end;
+        start_index  = start == YASLI_START ? 0 : start == YASLI_END ? (*self)->length : start >= 0 ? (size_t) start : (*self)->length + start;
+        end_index    = end == YASLI_START ? 0 : end == YASLI_END ? (*self)->length : end > 0 ? (size_t) end : (*self)->length + end;
     }
     else
     {
-        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : (*self)->length + end + 1;
-        end_index    = start == 0 ? (*self)->length : start > 0 ? (size_t) start + 1 : (*self)->length + start + 1;
+        start_index  = end == YASLI_START ? 0 : end == YASLI_END ? (*self)->length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : (*self)->length + end + 1;
+        end_index    = start == YASLI_START ? 0 : start == YASLI_END ? (*self)->length : start == 0 ? (*self)->length : start > 0 ? (size_t) start + 1 : (*self)->length + start + 1;
     }
     if ( start_index > end_index || end_index > (*self)->length )
     {
@@ -1562,13 +1568,13 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
     size_t end_index;
     if ( step > 0 )
     {
-        start_index  = start >= 0 ? (size_t) start : str_length + start;
-        end_index    = end > 0 ? (size_t) end : str_length + end;
+        start_index  = start == YASLI_START ? 0 : start == YASLI_END ? str_length : start >= 0 ? (size_t) start : str_length + start;
+        end_index    = end == YASLI_START ? 0 : end == YASLI_END ? str_length : end > 0 ? (size_t) end : str_length + end;
     }
     else
     {
-        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : str_length + end + 1;
-        end_index    = start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
+        start_index  = end == YASLI_START ? 0 : end == YASLI_END ? str_length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : str_length + end + 1;
+        end_index    = start == YASLI_START ? 0 : start == YASLI_END ? str_length : start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
     }
     if ( start_index > end_index || end_index > src->length )
     {
@@ -1772,13 +1778,13 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     size_t end_index;
     if ( step > 0 )
     {
-        start_index  = start >= 0 ? (size_t) start : str_length + start;
-        end_index    = end > 0 ? (size_t) end : str_length + end;
+        start_index  = start == YASLI_START ? 0 : start == YASLI_END ? str_length : start >= 0 ? (size_t) start : str_length + start;
+        end_index    = end == YASLI_START ? 0 : end == YASLI_END ? str_length : end > 0 ? (size_t) end : str_length + end;
     }
     else
     {
-        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : str_length + end + 1;
-        end_index    = start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
+        start_index  = end == YASLI_START ? 0 : end == YASLI_END ? str_length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : str_length + end + 1;
+        end_index    = start == YASLI_START ? 0 : start == YASLI_END ? str_length : start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
     }
     if ( start_index > end_index || end_index > str_length )
     {
@@ -1964,6 +1970,7 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     if ( str_resize( self, total_size ) )
     {
         memcpy( (*self)->cstr, result, total_size );
+        (*self)->cstr[ (*self)->length ] = 0;
         #if defined( __STDC_NO_VLA__ )
         free(result);
         free(info);

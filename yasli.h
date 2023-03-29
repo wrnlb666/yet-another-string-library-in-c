@@ -1,5 +1,5 @@
-#ifndef __STR_H__
-#define __STR_H__
+#ifndef __YASLI_H__
+#define __YASLI_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,11 @@
 
 // user should never change the value of length or capacity in the code. 
 typedef struct string_t string_t, *str_t;
+
+
+
+#define YASLI_START INT64_MIN
+#define YASLI_END   INT64_MAX
 
 
 
@@ -65,7 +70,7 @@ bool str_clear( string_t** string );
 
 // free the memory used by string, and at the same time return a new string.
 // e.g.: str = str_clear_to( str, str_new_format( "random string" ) );
-string_t* str_clear_to( string_t* old, string_t* new );
+string_t* str_clear_to( string_t* old, string_t* new_str );
 
 // reserve memory that can hold at least length char, length+1 if count '\0'
 bool str_reserve( string_t* string, size_t length );
@@ -192,4 +197,4 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
 
 
 
-#endif  // __STR_H__
+#endif  // __YASLI_H__
