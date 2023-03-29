@@ -1451,8 +1451,8 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
     }
     else
     {
-        start_index  = end >= 0 ? (size_t) end + 1 : src->length + end + 1;
-        end_index    = start > 0 ? (size_t) start : src->length + start;
+        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : src->length + end + 1;
+        end_index    = start == 0 ? src->length : start > 0 ? (size_t) start + 1 : src->length + start + 1;
     }
     if ( start_index > end_index || end_index > src->length )
     {
@@ -1503,8 +1503,8 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
     }
     else
     {
-        start_index  = end >= 0 ? (size_t) end + 1 : (*self)->length + end + 1;
-        end_index    = start > 0 ? (size_t) start : (*self)->length + start;
+        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : (*self)->length + end + 1;
+        end_index    = start == 0 ? (*self)->length : start > 0 ? (size_t) start + 1 : (*self)->length + start + 1;
     }
     if ( start_index > end_index || end_index > (*self)->length )
     {
@@ -1567,8 +1567,8 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
     }
     else
     {
-        start_index  = end >= 0 ? (size_t) end + 1 : str_length + end + 1;
-        end_index    = start > 0 ? (size_t) start : str_length + start;
+        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : str_length + end + 1;
+        end_index    = start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
     }
     if ( start_index > end_index || end_index > src->length )
     {
@@ -1777,8 +1777,8 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     }
     else
     {
-        start_index  = end >= 0 ? (size_t) end + 1 : str_length + end + 1;
-        end_index    = start > 0 ? (size_t) start : str_length + start;
+        start_index  = end == 0 ? (size_t) end : end > 0 ? (size_t) end + 1 : str_length + end + 1;
+        end_index    = start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
     }
     if ( start_index > end_index || end_index > str_length )
     {
