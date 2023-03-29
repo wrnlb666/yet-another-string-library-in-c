@@ -1,18 +1,27 @@
 CC = gcc
-CFLAG = -Wall -Wextra -std=gnu11 -pedantic
-OBJ = str.o
+CFLAG = -g -Wall -Wextra -Warray-bounds=2 -std=gnu11 -pedantic
+OBJ = yasli.o
 
 
-.PHONY: str example
+.PHONY: yasli example
 
-str: str.c str.h
+yasli: yasli.c yasli.h
 	$(CC) $(CFLAG) -fsanitize=leak,bounds,address $< -c
 
-example: example.c str.o
+example: example.c yasli.o
 	$(CC) $(CFLAG) -fsanitize=leak,bounds,address $(OBJ) $< -o $@
 
-strgc: str.c str.h
+main: main.c yasli.o
+	$(CC) $(CFLAG) -fsanitize=leak,bounds,address $(OBJ) $< -o $@
+	
+yasligc: yasli.c yasli.h
 	$(CC) $(CFLAG) -D USE_GC -fsanitize=leak,bounds,address $< -c
 
-examplegc: example.c str.o
+examplegc: example.c yasli.o
 	$(CC) $(CFLAG) -fsanitize=leak,bounds,address $(OBJ) $< -o example -lgc
+
+yasliwin: yasli.c yasli.h
+	$(CC) -Os -Wall -Wextra -std=gnu11 -pedantic -fPIC -shared -static -D USE_GC str.c -o libstr.dll -lgc
+
+yaslili: yasli.c yasli.h
+	$(CC) -Os -Wall -Wextra -std=gnu11 -pedantic -fPIC -shared -D USE_GC str.c -o libstr.so -lgc

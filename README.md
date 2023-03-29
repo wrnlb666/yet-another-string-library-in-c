@@ -1,7 +1,7 @@
-# string
+# Yet Another String Library In C
 A string library that only depends on libc, with optional bdw-gc support to have a gc manage memory for you. 
 
-define `USE_GC` when compiling `str.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid need of calling any `str_free` functions. 
+define `USE_GC` when compiling `yasli.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid need of calling any `str_free` functions. 
 
 ### Struct:
 ***
@@ -76,6 +76,10 @@ void str_free_arr( string_t** str_arr );
 * get the length of the string. 
 ```c
 size_t str_strlen( const string_t* string );
+```
+* get the length of the utf-8 encoded string. 
+```c
+size_t str_utf8_strlen( const string_t* string );
 ```
 * get the current capacity of the string. 
 ```c
