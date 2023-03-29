@@ -1442,8 +1442,18 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
     {
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
     }
-    size_t start_index  = start >= 0 ? (size_t) start : src->length + start;
-    size_t end_index    = end > 0 ? (size_t) end : src->length + end;
+    size_t start_index;
+    size_t end_index;
+    if ( step > 0 )
+    {
+        start_index  = start >= 0 ? (size_t) start : src->length + start;
+        end_index    = end > 0 ? (size_t) end : src->length + end;
+    }
+    else
+    {
+        start_index  = end >= 0 ? (size_t) end : src->length + end;
+        end_index    = start > 0 ? (size_t) start : src->length + start;
+    }
     if ( start_index > end_index || end_index > src->length )
     {
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1484,8 +1494,18 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
     {
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
     }
-    size_t start_index  = start >= 0 ? (size_t) start : (*self)->length + start;
-    size_t end_index    = end > 0 ? (size_t) end : (*self)->length + end;
+    size_t start_index;
+    size_t end_index;
+    if ( step > 0 )
+    {
+        start_index  = start >= 0 ? (size_t) start : (*self)->length + start;
+        end_index    = end > 0 ? (size_t) end : (*self)->length + end;
+    }
+    else
+    {
+        start_index  = end >= 0 ? (size_t) end : (*self)->length + end;
+        end_index    = start > 0 ? (size_t) start : (*self)->length + start;
+    }
     if ( start_index > end_index || end_index > (*self)->length )
     {
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1538,8 +1558,18 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
     }
     size_t str_length   = str_utf8_strlen( src );
-    size_t start_index  = start >= 0 ? (size_t) start : str_length + start;
-    size_t end_index    = end > 0 ? (size_t) end : str_length + end;
+    size_t start_index;
+    size_t end_index;
+    if ( step > 0 )
+    {
+        start_index  = start >= 0 ? (size_t) start : str_length + start;
+        end_index    = end > 0 ? (size_t) end : str_length + end;
+    }
+    else
+    {
+        start_index  = end >= 0 ? (size_t) end : str_length + end;
+        end_index    = start > 0 ? (size_t) start : str_length + start;
+    }
     if ( start_index > end_index || end_index > src->length )
     {
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1738,8 +1768,18 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
     }
     size_t str_length   = str_utf8_strlen( *self );
-    size_t start_index  = start >= 0 ? (size_t) start : str_length + start;
-    size_t end_index    = end > 0 ? (size_t) end : str_length + end;
+    size_t start_index;
+    size_t end_index;
+    if ( step > 0 )
+    {
+        start_index  = start >= 0 ? (size_t) start : str_length + start;
+        end_index    = end > 0 ? (size_t) end : str_length + end;
+    }
+    else
+    {
+        start_index  = end >= 0 ? (size_t) end : str_length + end;
+        end_index    = start > 0 ? (size_t) start : str_length + start;
+    }
     if ( start_index > end_index || end_index > str_length )
     {
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
