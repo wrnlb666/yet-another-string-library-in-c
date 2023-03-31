@@ -5,12 +5,12 @@
 #include "stb_sprintf.h"
 #define vsnprintf stbsp_vsnprintf
 
-#ifdef USE_GC
+#ifdef YASLI_GC
 #include <gc/gc.h>
 #define malloc( size ) GC_malloc( size )
 #define realloc( ptr, size ) GC_realloc( ptr, size )
 #define free( ptr ) (void) ptr
-#endif  //USE_GC
+#endif  // YASLI_GC
 
 
 // user should never change the value of length or capacity in the code. 
@@ -55,7 +55,15 @@ static inline bool str_resize( string_t** string, size_t size )
         }
         if ( (*string)->capacity == capacity ) return true;
         (*string) = realloc( (*string), sizeof ( string_t ) + sizeof ( char ) * ( (*string)->capacity - 1 ) );
-        if ( (*string) == NULL ) return ( fputs( "[ERRO]: out of memory\n", stderr ), false );
+        if ( (*string) == NULL ) 
+        {
+            #ifdef YASLI_DEBUG
+            return ( fputs( "[ERRO]: out of memory\n", stderr ), false );
+            #else
+            return false;
+            #endif
+        }
+        
     }
     else
     {
@@ -77,7 +85,14 @@ static inline bool str_resize( string_t** string, size_t size )
         }
         if ( (*string)->capacity == capacity ) return true;
         *string = realloc( *string, sizeof ( string_t ) + sizeof ( char ) * ( (*string)->capacity - 1 ) );
-        if ( (*string) == NULL ) return ( fputs( "[ERRO]: out of memory\n", stderr ), false );
+        if ( (*string) == NULL )
+        {
+            #ifdef YASLI_DEBUG
+            return ( fputs( "[ERRO]: out of memory\n", stderr ), false );
+            #else
+            return false;
+            #endif
+        }
     }
     (*string)->cstr[ (*string)->length ] = 0;
     return true;
@@ -223,6 +238,14 @@ size_t str_strlen( const string_t* string )
 
 size_t str_utf8_strlen( const string_t* string )
 {
+    if ( string == NULL )
+    {
+        #ifdef YASLI_DEBUG
+        return ( fputs( "[ERRO]: input is NULL\n", stderr ), 0 );
+        #else
+        return 0;
+        #endif
+    }
     size_t current_char = 0;
     size_t length = 0;
     const unsigned char* ptr = ( const unsigned char* ) string->cstr;
@@ -255,7 +278,11 @@ size_t str_utf8_strlen( const string_t* string )
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), 0 );
+            #else
+            return 0;
+            #endif
         }
         current_char++;
     }
@@ -275,7 +302,7 @@ const char* str_cstr( const string_t* string )
 }
 
 
-wchar_t* str_wstr( const string_t* string )
+const wchar_t* str_wstr( const string_t* string )
 {
     wchar_t* res;
     size_t size = mbstowcs( NULL, string->cstr, string->capacity );
@@ -285,11 +312,19 @@ wchar_t* str_wstr( const string_t* string )
         if ( res != NULL )
         {
             mbstowcs( res, string->cstr, string->capacity );
-            return res;
+            return (const wchar_t*) res;
         }
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: run out of memory\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
+    #ifdef YASLI_DEBUG
     return ( fputs( "[ERRO]: invalid multibyte sequence\n", stderr ), NULL );
+    #else
+    return NULL;
+    #endif
 }
 
 
@@ -551,7 +586,11 @@ string_t* str_substr( const string_t* src, size_t start, size_t size )
 {
     if ( start + size > src->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bound\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     string_t* substr = NULL;
     if ( str_resize( &substr, size ) )
@@ -568,7 +607,11 @@ string_t* str_utf8_substr( const string_t* src, size_t start, size_t size )
 {
     if ( start + size > src->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t current_char = 0;
     const unsigned char* ptr = ( const unsigned char* ) src->cstr;
@@ -576,7 +619,11 @@ string_t* str_utf8_substr( const string_t* src, size_t start, size_t size )
     {
         if ( *ptr == 0 )
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         else if ( ( *ptr & 0x80 ) == 0 )
         {
@@ -596,7 +643,11 @@ string_t* str_utf8_substr( const string_t* src, size_t start, size_t size )
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         current_char++;
     }
@@ -608,7 +659,11 @@ string_t* str_utf8_substr( const string_t* src, size_t start, size_t size )
     {
         if ( *str == 0 )
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         else if ( ( *str & 0x80 ) == 0 )
         {
@@ -632,7 +687,11 @@ string_t* str_utf8_substr( const string_t* src, size_t start, size_t size )
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         current_char++;
     }
@@ -656,15 +715,23 @@ string_t* str_strdup( const string_t* src )
         memcpy( result, src, sizeof ( string_t ) + sizeof ( char ) * src->length );
         return result;
     }
+    #ifdef YASLI_DEBUG
     return ( fputs( "[ERRO]: run out of memory\n", stderr ), NULL );
+    #else
+    return NULL;
+    #endif
 }
 
 
-string_t* str_inserted( const string_t* src, size_t index, const char* in )
+string_t* str_inserted_cstr( const string_t* src, size_t index, const char* in )
 {
     if ( index > src->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bound\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t size = strlen(in);
     string_t* new_str = NULL;
@@ -679,11 +746,15 @@ string_t* str_inserted( const string_t* src, size_t index, const char* in )
 }
 
 
-string_t* str_insert( string_t** src, size_t index, const char* in )
+string_t* str_insert_cstr( string_t** src, size_t index, const char* in )
 {
     if ( index > (*src)->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bound\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t size = strlen(in);
     size_t len  = (*src)->length;
@@ -893,7 +964,11 @@ string_t** str_sort( string_t** src, size_t size, const char* mode, ... )
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
     }
     if ( size == 0 )
@@ -938,7 +1013,11 @@ string_t** str_sort( string_t** src, size_t size, const char* mode, ... )
     }
     else
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     qsort( src, size, sizeof (string_t*), compar );
     return src;
@@ -988,7 +1067,11 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
     }
     if ( size == 0 )
@@ -1033,7 +1116,11 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... )
     }
     else
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: invalid mode\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     string_t** result = malloc( sizeof ( string_t* ) * ( size + 1 ) );
     for ( size_t i = 0; i < size; i++ )
@@ -1095,7 +1182,11 @@ char str_char_at( string_t* self, size_t index, char new_val )
 {
     if ( index >= self->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), 0 );
+        #else
+        return 0;
+        #endif
     }
     if ( new_val != 0 )
     {
@@ -1384,7 +1475,11 @@ char* str_utf8_char_at( string_t* self, size_t index )
     {
         if ( *ptr == 0 )
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), buf );
+            #else
+            return buf;
+            #endif
         }
         else if ( ( *ptr & 0x80 ) == 0 )
         {
@@ -1404,13 +1499,21 @@ char* str_utf8_char_at( string_t* self, size_t index )
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), buf );
+            #else
+            return buf;
+            #endif
         }
         current_char++;
     }
     if ( *ptr == 0 )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), buf );
+        #else
+        return buf;
+        #endif
     }
     else if ( ( *ptr & 0x80 ) == 0 )
     {
@@ -1432,7 +1535,11 @@ char* str_utf8_char_at( string_t* self, size_t index )
         memcpy( buf, ptr, 4 );
         return buf;
     }
+    #ifdef YASLI_DEBUG
     return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), buf );
+    #else
+    return buf;
+    #endif
 }
 
 
@@ -1446,7 +1553,11 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
 {
     if ( step == 0 )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t start_index;
     size_t end_index;
@@ -1462,7 +1573,11 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
     }
     if ( start_index > end_index || end_index > src->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t sub_len = end_index - start_index;
     const char* ptr = src->cstr + start_index;
@@ -1498,7 +1613,11 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
 {
     if ( step == 0 )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t start_index;
     size_t end_index;
@@ -1514,7 +1633,11 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
     }
     if ( start_index > end_index || end_index > (*self)->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t sub_len = end_index - start_index;
     const char* ptr = (*self)->cstr + start_index;
@@ -1561,7 +1684,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
 {
     if ( step == 0 )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t str_length   = str_utf8_strlen( src );
     size_t start_index;
@@ -1578,7 +1705,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
     }
     if ( start_index > end_index || end_index > src->length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t sub_len = end_index - start_index;
     size_t abs_step = llabs(step);
@@ -1591,7 +1722,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
     {
         if ( *ptr == 0 )
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         else if ( ( *ptr & 0x80 ) == 0 )
         {
@@ -1611,7 +1746,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         current_char++;
     }
@@ -1633,7 +1772,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
             #if defined( __STDC_NO_VLA__ )
             free(info);
             #endif
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         else if ( ( *str & 0x80 ) == 0 )
         {
@@ -1716,7 +1859,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
             #if defined( __STDC_NO_VLA__ )
             free(info);
             #endif
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         current_char++;
     }
@@ -1771,7 +1918,11 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
 {
     if ( step == 0 )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: slice step cannot be zero\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t str_length   = str_utf8_strlen( *self );
     size_t start_index;
@@ -1788,7 +1939,11 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     }
     if ( start_index > end_index || end_index > str_length )
     {
+        #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
     }
     size_t sub_len = end_index - start_index;
     size_t abs_step = llabs(step);
@@ -1800,7 +1955,11 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     {
         if ( *ptr == 0 )
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         else if ( ( *ptr & 0x80 ) == 0 )
         {
@@ -1820,7 +1979,11 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
         }
         else
         {
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         current_char++;
     }
@@ -1842,7 +2005,11 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
             #if defined( __STDC_NO_VLA__ )
             free(info);
             #endif
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         else if ( ( *str & 0x80 ) == 0 )
         {
@@ -1925,7 +2092,11 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
             #if defined( __STDC_NO_VLA__ )
             free(info);
             #endif
+            #ifdef YASLI_DEBUG
             return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), NULL );
+            #else
+            return NULL;
+            #endif
         }
         current_char++;
     }
@@ -1984,3 +2155,79 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
     return NULL;
 }
 
+
+int64_t str_index_of( const string_t* src, const char* needle, size_t number )
+{
+    if ( number == 0 )
+    {
+        return -1;
+    }
+    const char* ptr = src->cstr;
+    for ( size_t i = 0; i < number; i++ )
+    {
+        ptr = strstr( ptr, needle );
+        if ( ptr == NULL )
+        {
+            return -1;
+        }
+    }
+    return (int64_t) ( ptr - src->cstr );
+}
+
+
+string_t* str_removed( const string_t* src, size_t index, size_t length )
+{
+    if ( src == NULL )
+    {
+        #ifdef YASLI_DEBUG
+        return ( fputs( "[ERRO]: input is NULL\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
+    }
+    if ( index + length > src->length )
+    {
+        #ifdef YASLI_DEBUG
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
+    }
+    string_t* result = NULL;
+    if ( str_resize( &result, src->length - length ) )
+    {
+        memmove( result->cstr, src->cstr, index );
+        memmove( result->cstr + index, src->cstr + index + length, src->length - index - length );
+        result->cstr[ result->length ] = 0;
+        return result;
+    }
+    return NULL;
+}
+
+
+string_t* str_remove( string_t** self, size_t index, size_t length )
+{
+    if ( (*self) == NULL )
+    {
+        #ifdef YASLI_DEBUG
+        return ( fputs( "[ERRO]: input is NULL\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
+    }
+    if ( index + length > (*self)->length )
+    {
+        #ifdef YASLI_DEBUG
+        return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
+        #else
+        return NULL;
+        #endif
+    }
+    memmove( (*self)->cstr + index, (*self)->cstr + index + length, (*self)->length - index - length );
+    if ( str_resize( self, (*self)->length - length ) )
+    {
+        (*self)->cstr[ (*self)->length ] = 0;
+        return (*self);
+    }
+    return NULL;
+}

@@ -37,7 +37,7 @@ const char* str_cstr( const string_t* string );
 
 // get a wchar_t string from string, user free, probably useful on windows?
 // use str_free to free the returned result
-wchar_t* str_wstr( const string_t* string );
+const wchar_t* str_wstr( const string_t* string );
 
 // constructor
 string_t* str_new_string( const char* src );
@@ -119,10 +119,10 @@ string_t* str_utf8_substr( const string_t* src, size_t start, size_t size );
 string_t* str_strdup( const string_t* src );
 
 // insert a c string into src at index index, returning the new string
-string_t* str_inserted( const string_t* src, size_t index, const char* in );
+string_t* str_inserted_cstr( const string_t* src, size_t index, const char* in );
 
 // insert a c string into src at index index, returning the new address of src
-string_t* str_insert( string_t** src, size_t index, const char* in );
+string_t* str_insert_cstr( string_t** src, size_t index, const char* in );
 
 // replace old with new, returning a new string_t, src is not changed
 string_t* str_replaced( const string_t* src, const char* old_val, const char* new_val );
@@ -195,6 +195,13 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
 // slice, change the original string, take input as an utf-8 encoded string
 string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t step );
 
+// get the index of specific sub string
+int64_t str_index_of( const string_t* src, const char* needle, size_t number );
 
+// remove starting from index, of size length
+string_t* str_removed( const string_t* src, size_t index, size_t length );
+
+// remove starting from index, of size length
+string_t* str_remove( string_t** self, size_t index, size_t length );
 
 #endif  // __YASLI_H__
