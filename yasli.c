@@ -1302,6 +1302,7 @@ string_t* str_strip( string_t** self, const char* needle )
 
 string_t* str_from_file( const char* file_name )
 {
+    errno = 0;
     FILE* fp = fopen( file_name, "r" );
     if ( fp == NULL )
     {
@@ -1571,7 +1572,15 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
         start_index  = end == YASLI_START ? 0 : end == YASLI_END ? src->length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : src->length + end + 1;
         end_index    = start == YASLI_START ? 0 : start == YASLI_END ? src->length : start == 0 ? src->length : start > 0 ? (size_t) start + 1 : src->length + start + 1;
     }
-    if ( start_index > end_index || end_index > src->length )
+    if ( start_index > src->length )
+    {
+        start_index = src->length;
+    }
+    if ( end_index > src->length )
+    {
+        end_index = src->length;
+    }
+    if ( start_index > end_index )
     {
         #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1631,7 +1640,15 @@ string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step )
         start_index  = end == YASLI_START ? 0 : end == YASLI_END ? (*self)->length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : (*self)->length + end + 1;
         end_index    = start == YASLI_START ? 0 : start == YASLI_END ? (*self)->length : start == 0 ? (*self)->length : start > 0 ? (size_t) start + 1 : (*self)->length + start + 1;
     }
-    if ( start_index > end_index || end_index > (*self)->length )
+    if ( start_index > (*self)->length )
+    {
+        start_index = (*self)->length;
+    }
+    if ( end_index > (*self)->length )
+    {
+        end_index = (*self)->length;
+    }
+    if ( start_index > end_index )
     {
         #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1703,7 +1720,15 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
         start_index  = end == YASLI_START ? 0 : end == YASLI_END ? str_length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : str_length + end + 1;
         end_index    = start == YASLI_START ? 0 : start == YASLI_END ? str_length : start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
     }
-    if ( start_index > end_index || end_index > src->length )
+    if ( start_index > str_length )
+    {
+        start_index = str_length;
+    }
+    if ( end_index > str_length )
+    {
+        end_index = str_length;
+    }
+    if ( start_index > end_index )
     {
         #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -1881,8 +1906,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
                 index += info[i];
                 for ( size_t j = 0; j < abs_step; j++ )
                 {
-                    curr += info[i];
-                    i++;
+                    if ( i < sub_len )
+                    {
+                        curr += info[i];
+                        i++;
+                    }
                 }
             }
         }
@@ -1896,8 +1924,11 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
                 index += info[i];
                 for ( size_t j = 0; j < abs_step; j++ )
                 {
-                    curr -= info[i];
-                    i--;
+                    if ( i <= sub_len )
+                    {
+                        curr -= info[i];
+                        i--;
+                    }
                 }
             }
         }
@@ -1937,7 +1968,15 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
         start_index  = end == YASLI_START ? 0 : end == YASLI_END ? str_length : end == 0 ? (size_t) end + 1 : end > 0 ? (size_t) end + 1 : str_length + end + 1;
         end_index    = start == YASLI_START ? 0 : start == YASLI_END ? str_length : start == 0 ? str_length : start > 0 ? (size_t) start + 1 : str_length + start + 1;
     }
-    if ( start_index > end_index || end_index > str_length )
+    if ( start_index > str_length )
+    {
+        start_index = str_length;
+    }
+    if ( end_index > str_length )
+    {
+        end_index = str_length;
+    }
+    if ( start_index > end_index )
     {
         #ifdef YASLI_DEBUG
         return ( fputs( "[ERRO]: index out of bounds\n", stderr ), NULL );
@@ -2117,8 +2156,14 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
             index += info[i];
             for ( size_t j = 0; j < abs_step; j++ )
             {
-                curr += info[i];
-                i++;
+                if ( i < sub_len )
+                {
+                    if ( i <= sub_len )
+                    {
+                        curr -= info[i];
+                        i--;
+                    }
+                }
             }
         }
     }
@@ -2172,6 +2217,64 @@ int64_t str_index_of( const string_t* src, const char* needle, size_t number )
         }
     }
     return (int64_t) ( ptr - src->cstr );
+}
+
+
+int64_t str_utf8_index_of( const string_t* src, const char* needle, size_t number )
+{
+    if ( number == 0 )
+    {
+        return -1;
+    }
+    const char* ptr = src->cstr;
+    for ( size_t i = 0; i < number; i++ )
+    {
+        ptr = strstr( ptr, needle );
+        if ( ptr == NULL )
+        {
+            return -1;
+        }
+    }
+    int64_t index = ptr - src->cstr;
+
+    int64_t length = 0;
+    int64_t current_char = 0;
+    while ( length <= index )
+    {
+        if ( *ptr == 0 )
+        {
+            return current_char;
+        }
+        else if ( ( *ptr & 0x80 ) == 0 )
+        {
+            ptr++;
+            length++;
+        }
+        else if ( ( *ptr & 0xE0 ) == 0xC0 )
+        {
+            ptr += 2;
+            length += 2;
+        }
+        else if ( ( *ptr & 0xF0 ) == 0xE0 )
+        {
+            ptr += 3;
+            length += 3;
+        }
+        else if ( ( *ptr & 0xF8 ) == 0xF0 )
+        {
+            ptr += 4;
+            length += 4;
+        }
+        else
+        {
+            #ifdef YASLI_DEBUG
+            return ( fputs( "[ERRO]: invalid utf-8 sequence\n", stderr ), 0 );
+            #else
+            return 0;
+            #endif
+        }
+        current_char++;
+    }
 }
 
 
