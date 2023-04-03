@@ -1,7 +1,8 @@
 # Yet Another String Library In C
 A string library that only depends on libc, with optional bdw-gc support to have a gc manage memory for you. 
 
-define `USE_GC` when compiling `yasli.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid need of calling any `str_free` functions. 
+define `YASLI_GC` when compiling `yasli.c` to use [`bdw-gc`](https://www.hboehm.info/gc/) to avoid need of calling any `str_free` functions. 
+define `YASLI_DEBUG` when compiling `yasli.c` to let the library print out error messages. 
 
 ### Struct:
 ***
@@ -102,14 +103,82 @@ char str_char_at( string_t* self, size_t index, char new_val );
 char* str_utf8_char_at( string_t* self, size_t index );
 ```
 
-#### Content Manipulate Functions:
+#### Setter:
 * This is both a setter and a getter, to use it as a setter, give an ascii character to `new_val`. On success, this function will return the new character at the changed index. On failure, this funtion will return 0 or `\0`. 
 ```c
 char str_char_at( string_t* self, size_t index, char new_val );
 ```
-* This function append the `end` string to the end of `start` string and return a new string. both `end` and `start` is not changed. 
+* This function will set all the ASCII characters in the string to upper case. 
+```c
+void str_to_upper( string_t* string );
+```
+* This function will set all the ASCII characters in the string to lower case. 
+```c
+void str_to_lower( string_t* string );
+```
+
+#### Append Functions: 
+* This function append the `end` string to the end of `start` string and return a new string. both `end` and `start` is not changed. If out of memory, this function will return `NULL`. 
 ```c
 string_t* str_appended( const string_t* start, const string_t* end );
+```
+* This function append the `end` string to the end of `start` string and return a pointer to `start` string. `start` string may or may not be reallocated. If out of memory, this function will return `NULL`. 
+```c
+string_t* str_append( string_t** start, const string_t* end );
+```
+* This function append several `string_t*` to the end of `start` in the same order, the last element of the variadic arguments list must be `NULL`. The return value is a new string. If out of memory, this function will return `NULL`. 
+```c
+string_t* str_appendeds( const string_t* start, ... );
+```
+* This function append several `string_t*` to the end of `start` in the same order as input, the last element of the variadic arguments list must be `NULL`. It will return a pointer to `start`, string `start` may or may not reallocate. If out of memory, this function will return `NULL`. 
+```c
+string_t* str_appends( string_t** start, ... );
+```
+* This function append the `end` C type null terminated string to the end of `start` string and return a new string. both `end` and `start` is not changed. If out of memory, this function will return `NULL`.
+```c
+string_t* str_appended_cstr( const string_t* start, const char* end );
+```
+* This function append the `end` c type null terminated string to the end of `start` string and return a pointer to `start` string. `start` string may or may not be reallocated. If out of memory, this function will return `NULL`. 
+```c
+string_t* str_append_cstr( string_t** start, const char* end );
+```
+* This function append several `char*` to the end of `start` in the same order, the last element of the variadic arguments list must be `NULL`. The return value is a new string. If out of memory, this function will return `NULL`. 
+```c
+string_t* str_appended_cstrs( const string_t* start, ... );
+```
+* This function append several `char*` to the end of `start` in the same order as input, the last element of the variadic arguments list must be `NULL`. It will return a pointer to `start`, string `start` may or may not reallocate. If out of memory, this function will return `NULL`. 
+```c
+string_t* str_append_cstrs( string_t** start, ... );
+```
+
+#### High Level API:
+* This function split src into an array of new strings. The last element of the array is guaranteed to be `NULL`. Assuming the array is called `arr`, you can use `for ( str_t* str = arr; *str; str++ )` to traverse the array. The array is caller free, use `str_destroy_string_arr` to free the returned array. 
+```c
+string_t** str_split( const string_t* src, const char* needle );
+```
+* This function returns a sub-string from index `start`, with `size` number of ASCII characters. Return `NULL` on failure. 
+```c
+string_t* str_substr( const string_t* src, size_t start, size_t size );
+```
+* This function returns a sub-string from index `start`, with `size` number of utf-8 encoded characters. Return `NULL` on failure. 
+```c
+string_t* str_utf8_substr( const string_t* src, size_t start, size_t size );
+```
+* This function copys a string and create a new one from the existing string. Return `NULL` on failure. 
+```c
+string_t* str_strdup( const string_t* src );
+```
+* this function replace all `old_val` in the string with `new_val` and return a new string. Return `NULL` on failure. 
+```c
+string_t* str_replaced( const string_t* src, const char* old_val, const char* new_val );
+```
+* String slicing, use `YASLI_START` and `YASLI_END` for start of the string and end of the string. This function return a new string, return `NULL` on failure. 
+```c
+string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t step );
+```
+* String slicing, use `YASLI_START` and `YASLI_END` for start of the string and end of the string. This function return the address of self, or return `NULL` on failure.
+```c
+string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step );
 ```
 
 
