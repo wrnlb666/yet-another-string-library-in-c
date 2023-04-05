@@ -196,10 +196,10 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
 string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t step );
 
 // get the index of specific sub string
-int64_t str_index_of( const string_t* src, const char* needle, size_t number );
+int64_t str_find( const string_t* src, const char* needle, size_t number );
 
 // get the utf-8 index of specific sub string
-int64_t str_utf8_index_of( const string_t* src, const char* needle, size_t number );
+int64_t str_utf8_find( const string_t* src, const char* needle, size_t number );
 
 // remove starting from index, of size length
 string_t* str_removed( const string_t* src, size_t index, size_t length );

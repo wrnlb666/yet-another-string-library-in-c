@@ -2201,7 +2201,7 @@ string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t s
 }
 
 
-int64_t str_index_of( const string_t* src, const char* needle, size_t number )
+int64_t str_find( const string_t* src, const char* needle, size_t number )
 {
     if ( number == 0 )
     {
@@ -2220,7 +2220,7 @@ int64_t str_index_of( const string_t* src, const char* needle, size_t number )
 }
 
 
-int64_t str_utf8_index_of( const string_t* src, const char* needle, size_t number )
+int64_t str_utf8_find( const string_t* src, const char* needle, size_t number )
 {
     if ( number == 0 )
     {
