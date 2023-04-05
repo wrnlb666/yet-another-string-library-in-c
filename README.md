@@ -180,6 +180,14 @@ string_t* str_sliced( const string_t* src, int64_t start, int64_t end, int64_t s
 ```c
 string_t* str_slice( string_t** self, int64_t start, int64_t end, int64_t step );
 ```
+* utf-8 string slicing, use `YASLI_START` and `YASLI_END` for start of the string and end of the string. This function return a new string, or `NULL` on failure. 
+```c
+string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int64_t step );
+```
+* utf-8 string slicing, use `YASLI_START` and `YASLI_END` for start of the string and end of the string. This function return the address of self, or return `NULL` on failure. 
+```c
+string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t step );
+```
 
 
 #### Memory Manipulate Functions:
