@@ -196,6 +196,18 @@ string_t* str_stripped( const string_t* src, const char* needle );
 ```c
 string_t* str_strip( string_t** self, const char* needle );
 ```
+* Check if the string start with `str`. Return `true` if it does. 
+```c
+bool str_start_with( const string_t* self, const char* str );
+```
+* Check if the string end with `str`. Return `true` if it does. 
+```c
+bool str_end_with( const string_t* self, const char* str );
+```
+* Check if the string contains `str`. Return `true` if it does. 
+```c
+bool str_has( const string_t* self, const char* str );
+```
 
 
 #### Memory Manipulate Functions:
