@@ -188,6 +188,14 @@ string_t* str_utf8_sliced( const string_t* src, int64_t start, int64_t end, int6
 ```c
 string_t* str_utf8_slice( string_t** self, int64_t start, int64_t end, int64_t step );
 ```
+* This function returns a new `string_t*` that is stripped from src. Every single character in the needle is considered as a "not wanted" character, and will be deleted from the start and end. 
+```c
+string_t* str_stripped( const string_t* src, const char* needle );
+```
+* This function returns the address of stripped `self`. Every single character in the needle is considered as a "not wanted" character, and will be deleted from the start and end. 
+```c
+string_t* str_strip( string_t** self, const char* needle );
+```
 
 
 #### Memory Manipulate Functions:
