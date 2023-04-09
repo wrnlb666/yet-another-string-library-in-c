@@ -208,6 +208,18 @@ bool str_end_with( const string_t* self, const char* str );
 ```c
 bool str_has( const string_t* self, const char* str );
 ```
+* Check if the string is a decimal number. Return `true` if it is. 
+```c
+bool str_isdigit( const string_t* src );
+```
+* Check if the string is a hex number. Return `true` if it is. 
+```c
+bool str_isxdigit( const string_t* src );
+```
+* Check if the string is a floating number. Return `true` if it is.
+```c
+bool str_isfloat( const string_t* src );
+```
 
 
 #### Memory Manipulate Functions:
