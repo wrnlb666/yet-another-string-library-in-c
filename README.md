@@ -220,6 +220,10 @@ bool str_isxdigit( const string_t* src );
 ```c
 bool str_isfloat( const string_t* src );
 ```
+* Read a file as utf-8 sequense to a string and return the string. Return `NULL` if failed to open file or failed to allocate memory. 
+```c
+string_t* str_from_file( const char* file_name );
+```
 
 
 #### Memory Manipulate Functions:
