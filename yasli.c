@@ -1,5 +1,8 @@
 #include "yasli.h"
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS 1
+#endif  // _MSC_VER
 
 #define STB_SPRINTF_IMPLEMENTATION
 #include "stb_sprintf.h"
@@ -1146,6 +1149,23 @@ int str_strcmp( const string_t* str1, const string_t* str2 )
 }
 
 
+bool str_streq( const string_t* str1, const string_t* str2 )
+{
+    if ( str1->length != str2->length )
+    {
+        return false;
+    }
+    for ( size_t i = 0; i < str1->length; i++ )
+    {
+        if ( str1->cstr[i] != str2->cstr[i] )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 bool str_start_with( const string_t* self, const char* str )
 {
     size_t size = strlen( str );
@@ -2275,6 +2295,7 @@ int64_t str_utf8_find( const string_t* src, const char* needle, size_t number )
         }
         current_char++;
     }
+    return current_char;
 }
 
 

@@ -140,6 +140,9 @@ string_t** str_sorted( string_t** src, size_t size, const char* mode, ... );
 // compare str, 0 means the same
 int str_strcmp( const string_t* str1, const string_t* str2 );
 
+// test if str are equal
+bool str_streq( const string_t* str1, const string_t* str2 );
+
 // return if the string start with the input c string
 bool str_start_with( const string_t* self, const char* str );
 
