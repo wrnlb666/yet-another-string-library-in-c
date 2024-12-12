@@ -1,0 +1,5 @@
+*.o
+*.so
+*.dll
+!example.c
+example*
